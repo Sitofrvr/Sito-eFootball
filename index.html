@@ -48,17 +48,18 @@ const API="https://sito.olydccx.workers.dev", CH="https://t.me/efootxifriendly";
 const tg=window.Telegram?.WebApp;tg?.ready();tg?.expand();
 const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let S={apps:[],tuts:[],lock:true,member:false,admin:false,preview:false},tab="home",as="owner",q="",F={},asked=false;
-const call=async(p,b={})=>{try{return await(await fetch(API+"/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg?.initData||"",key:localStorage.getItem("k")||"",...b})})).json()}catch{return{error:"network"}}};
+const call=async(p,b={})=>{try{return await(await fetch(API+"/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg?.initData||"",key:localStorage.getItem("k")||"",session:localStorage.getItem("ss")||"",...b})})).json()}catch{return{error:"network"}}};
 const go=u=>/t\.me/.test(u)&&tg?tg.openTelegramLink(u):tg?tg.openLink(u):window.open(u,"_blank");
 const mem=()=>S.admin?as!=="visitor":S.member;
 const L={version:"Version",publisher:"Publisher",req:"Requirements",cat:"Category",size:"Size",price:"Price"};
-async function load(){const r=await call("init");if(r.error){$("#v").innerHTML='<p class="empty">Can’t reach the server. Try again later.</p>';return}
+async function load(){const m=location.hash.match(/^#c=([0-9a-f]+)$/);if(m){history.replaceState(null,"",location.pathname);const x=await call("redeem",{code:m[1]});if(x.session)localStorage.setItem("ss",x.session);else alert("This link expired. Open the site in Telegram and make a new one.")}
+ const r=await call("init");if(r.error){$("#v").innerHTML='<p class="empty">Can’t reach the server. Try again later.</p>';return}
  S={...S,...r};if(location.hash==="#admin"&&S.preview&&!S.admin&&!asked){asked=true;const k=prompt("Preview key");if(k){localStorage.setItem("k",k);return load()}}draw()}
 function draw(){
  const tabs=[["home","Home"],["apps","Apps"],["tuts","Tutorials"],["social","Social"],["more","More"]];if(S.admin&&as==="owner")tabs.push(["admin","Admin"]);
  $("#nav").innerHTML=tabs.map(([k,n])=>`<button class="${tab===k?"on":""}" onclick="tab='${k}';draw()">${n}</button>`).join("");
  $("#bar").innerHTML=S.admin&&as!=="owner"?`<div class="bar">Previewing as ${as==="member"?"Member":"Visitor"} · <u onclick="as='owner';draw()">Exit</u></div>`:"";
- if(!tg?.initData&&!S.preview&&S.lock&&!S.admin){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>Open this app through our Telegram channel to get the downloads.</p><a class="btn p" href="${CH}">Open the channel</a></div>`;$("#nav").innerHTML="";return}
+ if(!tg?.initData&&!S.member&&S.lock&&!S.admin){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>Open this site once from our Telegram channel link. Then tap “Use in my browser” in More, and it will work here too.</p><a class="btn p" href="${CH}">Open the channel</a></div>`;$("#nav").innerHTML="";return}
  ({home,apps,tuts,social,more,admin})[tab]();window.scrollTo(0,0)}
 function home(){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>Welcome to Sito Web! Here you can find all the mods published. Join my telegram for advanced news!</p>
 <button class="btn p" onclick="go(CH)">Join our Telegram</button><br><input placeholder="Search apps" aria-label="Search apps" onchange="q=this.value;tab='apps';draw()"></div>`}
@@ -78,8 +79,12 @@ function lockSheet(){modal(`<h2>Join the channel first</h2><p>The downloads are 
  <button class="btn p" onclick="go(CH)">Open the channel</button><button class="btn" onclick="$('#m').innerHTML='';load()">I joined, check again</button>`)}
 function tuts(){$("#v").innerHTML=`<h2>Tutorials</h2>`+(S.tuts.map(t=>`<div class="card" style="display:block;cursor:default">${t.title?`<b>${esc(t.title)}</b>`:""}${t.text?`<p style="margin:6px 0 0;white-space:pre-wrap">${esc(t.text)}</p>`:""}${t.video?`<button class="btn" style="margin-top:12px" onclick="go('${esc(t.video)}')">Watch the video</button>`:""}</div>`).join("")||'<p class="empty">Nothing here yet.</p>')}
 function social(){$("#v").innerHTML=`<h2>Social</h2><div class="card" onclick="go(CH)"><div class="ic" style="display:grid;place-items:center;font-size:26px">✈</div><div><b>Telegram</b><small>Tap to open</small></div></div>`}
-function more(){$("#v").innerHTML=`<h2>More</h2><button class="btn" onclick="info('About','Sito eFootball shares mods for eFootball. New releases and news are posted first in our Telegram channel.')">About</button><button class="btn" onclick="info('Privacy','We only see your Telegram name and ID to check that you joined the channel, and to count visits and downloads. We show no ads and sell nothing.')">Privacy</button>`}
+function more(){$("#v").innerHTML=`<h2>More</h2>${extra()}<button class="btn" onclick="info('About','Sito eFootball shares mods for eFootball. New releases and news are posted first in our Telegram channel.')">About</button><button class="btn" onclick="info('Privacy','We only see your Telegram name and ID to check that you joined the channel, and to count visits and downloads. We show no ads and sell nothing.')">Privacy</button>`}
 function info(t,b){modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${t}</h2><p>${b}</p>`)}
+const extra=()=>tg?.initData?'<button class="btn p" style="margin-bottom:10px" onclick="mk()">Use in my browser</button>':localStorage.getItem("ss")?'<button class="btn" style="margin-bottom:10px" onclick="so()">Sign out of this browser</button>':"";
+const so=()=>{localStorage.removeItem("ss");load()};
+async function mk(){const r=await call("link");if(!r.code)return alert(r.error||"Try again");window._u=location.origin+location.pathname+"#c="+r.code;
+ modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>Your browser link</h2><p>Open it in Chrome once. It works one time and expires in 10 minutes. Don’t share it.</p><button class="btn p" onclick="tg.openLink(window._u)">Open in my browser</button><button class="btn" onclick="navigator.clipboard?.writeText(window._u).then(()=>alert('Copied'))">Copy link</button>`)}
 // ---------- admin ----------
 const AF=[["name","App name"],["version","Version"],["publisher","Publisher"],["req","Requirements"],["cat","Category"],["size","Size"],["price","Price"],["safety","Safety label"],["desc","Description","t"],["url","MediaFire link"]],TF=[["title","Title"],["text","Text","t"],["video","Telegram video link"]];
 async function admin(){$("#v").innerHTML='<p class="empty">Loading…</p>';const s=await call("stats");const n=id=>(s.per?.find(p=>p.app===id)?.c)||0;
