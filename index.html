@@ -42,18 +42,21 @@ input,textarea{width:100%;background:#071230;border:1.5px solid var(--line);bord
 .lb{position:fixed;inset:0;background:rgba(2,6,15,.94);z-index:20;display:flex;align-items:center;justify-content:center}.lb img{max-width:100%;max-height:82vh;object-fit:contain}.lbx{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;background:#0a1530}
 .ar{position:absolute;top:50%;transform:translateY(-50%);background:rgba(10,21,48,.85);border:1.5px solid var(--blue);color:var(--txt);width:46px;height:46px;border-radius:50%;font-size:28px;line-height:1;cursor:pointer}.ar.l{left:10px}.ar.r{right:10px}
 .ct{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:var(--dim)}
+.hv{position:relative}.hv img{width:100%;aspect-ratio:16/10;object-fit:contain;background:#071230;border-radius:16px;border:1px solid var(--line);display:block;cursor:zoom-in}.hv .ar{width:40px;height:40px;font-size:24px}
+.dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:6px;pointer-events:none}.dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4)}.dots i.on{background:#fff}
 </style></head>
 <body>
 <div id="bar"></div><main id="v"></main>
 <nav class="nav" id="nav"></nav><div id="m"></div><div id="m2"></div>
 <script>
 // ===== EDIT THIS =====
-const API="https://sito.olydccx.workers.dev", CH="https://t.me/efootxifriendly";
+const API="https://sito.olydccx.workers.dev", CH="https://t.me/efootxifriendly", MINI="https://t.me/SitoAgentBOT/Sito";
 // =====================
+if(!localStorage.getItem("vid"))localStorage.setItem("vid",Math.random().toString(36).slice(2,12)+Date.now().toString(36));
 const tg=window.Telegram?.WebApp;tg?.ready();tg?.expand();
 const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let S={apps:[],tuts:[],lock:true,member:false,admin:false,preview:false},tab="home",as="owner",q="",F={},asked=false,boot=true;
-const call=async(p,b={})=>{try{return await(await fetch(API+"/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg?.initData||"",key:localStorage.getItem("k")||"",session:localStorage.getItem("ss")||"",...b})})).json()}catch{return{error:"network"}}};
+const call=async(p,b={})=>{try{return await(await fetch(API+"/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg?.initData||"",key:localStorage.getItem("k")||"",session:localStorage.getItem("ss")||"",vid:localStorage.getItem("vid")||"",...b})})).json()}catch{return{error:"network"}}};
 const go=u=>/t\.me/.test(u)&&tg?tg.openTelegramLink(u):tg?tg.openLink(u):window.open(u,"_blank");
 const mem=()=>S.admin?as!=="visitor":S.member;
 const L={version:"Version",publisher:"Publisher",req:"Requirements",cat:"Category",size:"Size",price:"Price"};
@@ -64,13 +67,21 @@ function draw(){
  const tabs=[["home","Home"],["apps","Apps"],["tuts","Tutorials"],["social","Social"],["more","More"]];if(S.admin&&as==="owner")tabs.push(["admin","Admin"]);
  $("#nav").innerHTML=tabs.map(([k,n])=>`<button class="${tab===k?"on":""}" onclick="tab='${k}';draw()">${n}</button>`).join("");
  $("#bar").innerHTML=S.admin&&as!=="owner"?`<div class="bar">Previewing as ${as==="member"?"Member":"Visitor"} · <u onclick="as='owner';draw()">Exit</u></div>`:"";
- if(!tg?.initData&&!S.member&&S.lock&&!S.admin){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>Open this site once from our Telegram channel link. Then tap “Use in my browser” in More, and it will work here too.</p><a class="btn p" href="${CH}">Open the channel</a></div>`;$("#nav").innerHTML="";return}
+ if(!tg?.initData&&!S.member&&S.lock&&!S.admin){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>Opening Sito eFootball in Telegram…</p><a class="btn p" href="${MINI}">Open in Telegram</a><a class="btn" href="${CH}">Join the channel</a></div>`;$("#nav").innerHTML="";if(!sessionStorage.getItem("rd")){sessionStorage.setItem("rd","1");setTimeout(()=>{location.href=MINI},1200)}return}
  ({home,apps,tuts,social,more,admin})[tab]();window.scrollTo(0,0)}
 function home(){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>Welcome to Sito Web! Here you can find all the mods published. Join my telegram for advanced news!</p>
-<button class="btn p" onclick="go(CH)">Join our Telegram</button><br><input placeholder="Search apps" aria-label="Search apps" onchange="q=this.value;tab='apps';draw()"></div>`}
+<button class="btn p" onclick="go(CH)">Join our Telegram</button><br><input placeholder="Search apps and tutorials" aria-label="Search apps and tutorials" oninput="gs(this.value)" style="margin-top:14px"></div><div id="sug" style="margin-top:14px"></div>`}
+const hay=(o,ks)=>ks.map(k=>o[k]||"").join(" ").toLowerCase();
+const TH={};
+const ico=x=>x.icon?`<img src="${x.icon}" alt="">`:`<div class="ic" data-ic="${x.id}"></div>`;
+async function fi(){for(const e of document.querySelectorAll("[data-ic]")){const id=+e.dataset.ic;if(!(id in TH)){const r=await call("app",{id});TH[id]=r.img||""}if(TH[id])e.outerHTML=`<img src="${TH[id]}" alt="">`}}
+function gs(v){v=v.trim().toLowerCase();const el=$("#sug");if(!v){el.innerHTML="";return}
+ const a=S.apps.filter(x=>hay(x,["name","version","cat","publisher","desc","log"]).includes(v)).slice(0,6),t=S.tuts.filter(x=>hay(x,["title","text"]).includes(v)).slice(0,6);
+ el.innerHTML=(a.map(x=>`<div class="card" onclick="show(${x.id})">${ico(x)}<div><b>${esc(x.name)}</b><small>App${x.version?" · "+esc(x.version):""}</small></div></div>`).join("")+t.map(x=>`<div class="card" onclick="tshow(${x.id})"><div class="ic" style="display:grid;place-items:center;font-size:22px">▶</div><div><b>${esc(x.title||"Tutorial")}</b><small>Tutorial</small></div></div>`).join(""))||'<p class="empty">No results.</p>';fi()}
+function tshow(id){const t=S.tuts.find(x=>x.id===id);modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${esc(t.title||"Tutorial")}</h2>${t.text?`<p style="white-space:pre-wrap">${esc(t.text)}</p>`:""}${t.video?`<button class="btn p" onclick="go('${esc(t.video)}')">Watch the video</button>`:""}`)}
 function apps(){$("#v").innerHTML=`<h2>Apps</h2><input value="${esc(q)}" placeholder="Search apps" aria-label="Search apps" oninput="q=this.value;rl()" style="margin-bottom:14px"><div id="list"></div>`;rl()}
 function rl(){const a=S.apps.filter(x=>(x.name||"").toLowerCase().includes(q.toLowerCase()));
- $("#list").innerHTML=a.map(x=>`<div class="card" onclick="show(${x.id})">${x.icon?`<img src="${x.icon}" alt="">`:'<div class="ic"></div>'}<div><b>${esc(x.name)}${bd(x)?`<span class="bd">${bd(x)}</span>`:""}</b><small>${esc([x.version,x.size,x.cat].filter(Boolean).join(" · "))}</small></div></div>`).join("")||'<p class="empty">Nothing here yet.</p>'}
+ $("#list").innerHTML=a.map(x=>`<div class="card" onclick="show(${x.id})">${ico(x)}<div><b>${esc(x.name)}${bd(x)?`<span class="bd">${bd(x)}</span>`:""}</b><small>${esc([x.version,x.size,x.cat].filter(Boolean).join(" · "))}</small></div></div>`).join("")||'<p class="empty">Nothing here yet.</p>';fi()}
 function modal(h){$("#m").innerHTML=`<div class="modal" onclick="if(event.target===this)$('#m').innerHTML=''"><div class="sheet">${h}</div></div>`}
 function show(id){const x=S.apps.find(a=>a.id===id);
  modal(`<button class="x" aria-label="Close" onclick="$('#m').innerHTML=''">✕</button><h2>${esc(x.name)}${bd(x)?`<span class="bd">${bd(x)}</span>`:""}</h2>
@@ -83,7 +94,10 @@ async function dl(id){if(S.admin&&as==="visitor"&&S.lock)return lockSheet();
 const bd=x=>{const n=Date.now()/1000;return n-x.t<604800?"New":n-x.u<604800?"Updated":""};
 async function rp(id){const r=await call("report",{id});alert(r.ok?"Thanks! The owner has been told.":r.error||"Try again")}
 let IM=[],IMi=0,tx=0;
-function loadHero(id){call("app",{id}).then(r=>{if(!r.img||!$("#hero"))return;IM=[r.img,...(r.shots||[])];$("#hero").style.marginBottom="12px";$("#hero").innerHTML=`<img src="${r.img}" alt="" onclick="view(0)" style="width:100%;border-radius:16px;border:1px solid var(--line);cursor:zoom-in;display:block">${IM.length>1?`<small style="display:block;text-align:center;color:var(--dim);margin-top:6px">${IM.length} images · tap to view</small>`:""}`})}
+let HI=0;
+function loadHero(id){call("app",{id}).then(r=>{if(!r.img||!$("#hero"))return;IM=[r.img,...(r.shots||[])];HI=0;const n=IM.length;$("#hero").style.marginBottom="12px";$("#hero").innerHTML=`<div class="hv" ontouchstart="tx=event.touches[0].clientX" ontouchend="hsw(event)"><img id="hi" src="${IM[0]}" alt="" onclick="view(HI)">${n>1?`<button class="ar l" aria-label="Previous image" onclick="hs(-1)">‹</button><button class="ar r" aria-label="Next image" onclick="hs(1)">›</button><div class="dots">${IM.map((_,i)=>`<i class="${i?"":"on"}"></i>`).join("")}</div>`:""}</div>`})}
+function hs(d){const n=IM.length;HI=(HI+d+n)%n;$("#hi").src=IM[HI];document.querySelectorAll(".dots i").forEach((e,i)=>e.className=i===HI?"on":"")}
+const hsw=e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)hs(d<0?1:-1)};
 function view(i){const n=IM.length;IMi=(i+n)%n;$("#m2").innerHTML=`<div class="lb" ontouchstart="tx=event.touches[0].clientX" ontouchend="sw(event)"><button class="x lbx" aria-label="Close" onclick="$('#m2').innerHTML=''">✕</button>${n>1?`<button class="ar l" aria-label="Previous" onclick="view(IMi-1)">‹</button><button class="ar r" aria-label="Next" onclick="view(IMi+1)">›</button><div class="ct">${IMi+1} / ${n}</div>`:""}<img src="${IM[IMi]}" alt=""></div>`}
 const sw=e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)view(IMi+(d<0?1:-1))};
 function lockSheet(){modal(`<h2>Join the channel first</h2><p>The downloads are for channel members. Join, then come back and tap the button below.</p>
@@ -98,12 +112,14 @@ async function mk(){const r=await call("link");if(!r.code)return alert(r.error||
  modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>Your browser link</h2><p>Open it in Chrome once. It works one time and expires in 10 minutes. Don’t share it.</p><button class="btn p" onclick="tg.openLink(window._u)">Open in my browser</button><button class="btn" onclick="navigator.clipboard?.writeText(window._u).then(()=>alert('Copied'))">Copy link</button>`)}
 // ---------- admin ----------
 const AF=[["name","App name"],["version","Version"],["log","What’s new (changelog)","t"],["publisher","Publisher"],["req","Requirements"],["cat","Category"],["size","Size"],["price","Price"],["safety","Safety label"],["desc","Description","t"],["url","MediaFire link"]],TF=[["title","Title"],["text","Text","t"],["video","Telegram video link"]];
-async function admin(){$("#v").innerHTML='<p class="empty">Loading…</p>';const s=await call("stats");const n=id=>(s.per?.find(p=>p.app===id)?.c)||0;
- $("#v").innerHTML=`<h2>Admin</h2><div class="row"><small>Visitors</small><b>${s.visits??0} total · ${s.today??0} today</b></div><div class="row"><small>Downloads</small><b>${s.downloads??0}</b></div>
+async function admin(){$("#v").innerHTML='<p class="empty">Loading…</p>';const s=await call("admin",{op:"stats"});const n=id=>(s.per?.find(p=>p.app===id)?.c)||0;
+ $("#v").innerHTML=`<h2>Admin</h2><div class="row"><small>Visitors</small><b id="sv">${s.visits??0} total · ${s.today??0} today</b></div><div class="row"><small>Downloads</small><b id="sdl">${s.downloads??0}</b></div>
  <div class="row"><small>Require channel join</small><button class="btn ${S.lock?"p":""}" onclick="lk()">${S.lock?"On (tap to turn off)":"Off (tap to turn on)"}</button></div>
  <small style="color:var(--dim)">View as</small><div class="seg"><button class="btn" onclick="as='member';draw()">Member</button><button class="btn" onclick="as='visitor';draw()">Visitor</button></div>
- <h3>Apps</h3>${S.apps.map(x=>`<div class="row"><b>${esc(x.name)}</b> <small>${n(x.id)} downloads</small><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('apps',${x.id})">Edit</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('apps')">Add app</button>
- <h3>Tutorials</h3>${S.tuts.map(x=>`<div class="row"><b>${esc(x.title||"Untitled")}</b><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('tuts',${x.id})">Edit</button><button class="btn" onclick="del('tuts',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('tuts')">Add tutorial</button>`}
+ <h3>Apps</h3>${S.apps.map(x=>`<div class="row"><b>${esc(x.name)}</b> <small id="pa${x.id}">${n(x.id)} downloads</small><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('apps',${x.id})">Edit</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('apps')">Add app</button>
+ <h3>Tutorials</h3>${S.tuts.map(x=>`<div class="row"><b>${esc(x.title||"Untitled")}</b><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('tuts',${x.id})">Edit</button><button class="btn" onclick="del('tuts',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('tuts')">Add tutorial</button>`;live()}
+let AT;
+function live(){clearInterval(AT);AT=setInterval(async()=>{if(tab!=="admin"||!$("#sv")){clearInterval(AT);return}const s=await call("admin",{op:"stats"});if(s.error||!$("#sv"))return;$("#sv").textContent=`${s.visits} total · ${s.today} today`;$("#sdl").textContent=s.downloads;(s.per||[]).forEach(p=>{const e=$("#pa"+p.app);if(e)e.textContent=p.c+" downloads"})},8000)}
 async function lk(){await call("admin",{op:"lock",v:!S.lock});S.lock=!S.lock;admin()}
 async function del(kind,id){if(confirm("Delete this?")){await call("admin",{op:"del",kind,id});await load();tab="admin";draw()}}
 const PRE={name:["eFootxi","Kipas FOOTBALL","eFootball73"],publisher:["Sito (Owner)"],price:["Free"],safety:["100% Safe and Tested"]},MAND=["name","url"];
@@ -126,7 +142,8 @@ function rm(k){collect();F.hide[k]=1;rf()}
 function ad(k){collect();delete F.hide[k];rf()}
 async function pm(e){const f=e.files[0];if(!f)return;collect();F.d.img=await shrink(f,800,.72);F.d.icon=await shrink(f,0,.8,192);rf()}
 async function ps(e){collect();F.d.shots=F.d.shots||[];for(const f of [...e.files]){if(F.d.shots.length>=6)break;F.d.shots.push(await shrink(f,800,.72))}rf()}
-async function save(){collect();const fs=F.kind==="apps"?AF:TF,data={};fs.forEach(([k])=>{const v=F.hide[k]?"":String(F.d[k]||"").trim();if(v)data[k]=v});
+const thumb=u=>new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement("canvas");c.width=c.height=192;const m=Math.min(i.width,i.height);c.getContext("2d").drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,192,192);r(c.toDataURL("image/webp",.8))};i.onerror=()=>r("");i.src=u});
+async function save(){collect();if(F.kind==="apps"&&F.d.img&&!F.d.icon)F.d.icon=await thumb(F.d.img);const fs=F.kind==="apps"?AF:TF,data={};fs.forEach(([k])=>{const v=F.hide[k]?"":String(F.d[k]||"").trim();if(v)data[k]=v});
  if(F.kind==="apps"){if(!data.name||!data.url)return alert("App name and MediaFire link are required.");if(F.d.img)data.img=F.d.img;if(F.d.icon)data.icon=F.d.icon;if(F.d.shots?.length)data.shots=F.d.shots}
  else if(!Object.keys(data).length)return alert("Fill in at least one field.");
  const r=await call("admin",{op:"save",kind:F.kind,id:F.id,data});if(r.ok){$("#m").innerHTML="";await load();tab="admin";draw()}else alert(r.error||"Could not save")}
