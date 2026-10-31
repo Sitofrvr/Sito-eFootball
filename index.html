@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sito eFootball</title>
+<meta property="og:title" content="Sito eFootball">
+<meta property="og:description" content="Welcome to Sito Web! Here you can find all the mods published. Join my telegram for advanced news!">
+<meta property="og:image" content="https://sitofrvr.github.io/Sito-eFootball/banner.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="logo.png">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050b1c;--card:#0a1530;--line:#1b3a73;--blue:#3d8bff;--ice:#9ad7ff;--txt:#e8f1ff;--dim:#8ea6cc}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.5 system-ui,sans-serif}
+body{padding:0 0 calc(76px + env(safe-area-inset-bottom));padding-top:env(safe-area-inset-top)}
+h1,h2,h3,.nav button{font-family:"Chakra Petch",system-ui,sans-serif}
+main{max-width:560px;margin:0 auto;padding:22px 18px}
+.hero{text-align:center;padding-top:10px}
+.logo{width:190px;height:190px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 0 0 6px #0b1d46,0 0 60px 14px rgba(61,139,255,.55)}
+h1{font-size:34px;margin:28px 0 6px}h2{font-size:26px;margin:6px 0 16px}
+p{color:var(--dim);margin:0 0 16px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;border-radius:26px;border:1.5px solid var(--blue);background:#0b1e48;color:var(--txt);font:500 16px system-ui;cursor:pointer;text-decoration:none;padding:10px 18px}
+.btn.p{background:var(--blue);color:#02112b;font-weight:700}.btn+.btn{margin-top:10px}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,.nav button:focus-visible{outline:3px solid var(--ice);outline-offset:2px}
+input,textarea{width:100%;background:#071230;border:1.5px solid var(--line);border-radius:14px;color:var(--txt);padding:12px 14px;font:16px system-ui;margin:0}
+.card{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px;cursor:pointer}
+.card img,.ic{width:56px;height:56px;border-radius:14px;object-fit:cover;flex:none;background:#10265a}
+.card b{display:block;font-size:17px}.card small{color:var(--dim)}
+.nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#070f26;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;background:none;border:0;color:var(--dim);padding:16px 2px;font-size:14px;cursor:pointer}
+.nav button.on{color:var(--ice);text-shadow:0 0 14px var(--blue);box-shadow:inset 0 3px 0 var(--blue)}
+.modal{position:fixed;inset:0;background:rgba(2,6,16,.8);display:flex;align-items:flex-end;justify-content:center;z-index:9}
+.sheet{background:var(--card);border:1px solid var(--blue);border-radius:24px 24px 0 0;width:100%;max-width:560px;max-height:90vh;overflow:auto;padding:22px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:0 0 40px rgba(61,139,255,.35)}
+.row{background:#071230;border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:8px}.row small{display:block;color:var(--dim)}
+.x{float:right;background:none;border:1.5px solid var(--blue);color:var(--txt);border-radius:50%;width:38px;height:38px;font-size:18px;cursor:pointer}
+.fr{display:flex;gap:6px;margin-bottom:8px}.fr b{cursor:pointer;padding:10px;color:var(--dim)}
+.bar{background:var(--blue);color:#02112b;text-align:center;padding:8px;font-weight:700;position:sticky;top:0}
+.seg{display:flex;gap:6px;margin-bottom:14px}.seg .btn{min-height:42px;font-size:14px}.empty{text-align:center;color:var(--dim);padding:30px 0}
+</style></head>
+<body>
+<div id="bar"></div><main id="v"></main>
+<nav class="nav" id="nav"></nav><div id="m"></div>
+<script>
+// ===== EDIT THIS =====
+const API="https://YOUR-WORKER.YOUR-NAME.workers.dev", CH="https://t.me/efootxifriendly";
+// =====================
+const tg=window.Telegram?.WebApp;tg?.ready();tg?.expand();
+const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let S={apps:[],tuts:[],lock:true,member:false,admin:false,preview:false},tab="home",as="owner",q="",F={},asked=false;
+const call=async(p,b={})=>{try{return await(await fetch(API+"/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg?.initData||"",key:localStorage.getItem("k")||"",...b})})).json()}catch{return{error:"network"}}};
+const go=u=>/t\.me/.test(u)&&tg?tg.openTelegramLink(u):tg?tg.openLink(u):window.open(u,"_blank");
+const mem=()=>S.admin?as!=="visitor":S.member;
+const L={version:"Version",publisher:"Publisher",req:"Requirements",cat:"Category",size:"Size",price:"Price"};
+async function load(){const r=await call("init");if(r.error){$("#v").innerHTML='<p class="empty">Can’t reach the server. Try again later.</p>';return}
+ S={...S,...r};if(location.hash==="#admin"&&S.preview&&!S.admin&&!asked){asked=true;const k=prompt("Preview key");if(k){localStorage.setItem("k",k);return load()}}draw()}
+function draw(){
+ const tabs=[["home","Home"],["apps","Apps"],["tuts","Tutorials"],["social","Social"],["more","More"]];if(S.admin&&as==="owner")tabs.push(["admin","Admin"]);
+ $("#nav").innerHTML=tabs.map(([k,n])=>`<button class="${tab===k?"on":""}" onclick="tab='${k}';draw()">${n}</button>`).join("");
+ $("#bar").innerHTML=S.admin&&as!=="owner"?`<div class="bar">Previewing as ${as==="member"?"Member":"Visitor"} · <u onclick="as='owner';draw()">Exit</u></div>`:"";
+ if(!tg?.initData&&!S.preview&&S.lock&&!S.admin){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>Open this app through our Telegram channel to get the downloads.</p><a class="btn p" href="${CH}">Open the channel</a></div>`;$("#nav").innerHTML="";return}
+ ({home,apps,tuts,social,more,admin})[tab]();window.scrollTo(0,0)}
+function home(){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>Welcome to Sito Web! Here you can find all the mods published. Join my telegram for advanced news!</p>
+<button class="btn p" onclick="go(CH)">Join our Telegram</button><br><input placeholder="Search apps" aria-label="Search apps" onchange="q=this.value;tab='apps';draw()"></div>`}
+function apps(){$("#v").innerHTML=`<h2>Apps</h2><input value="${esc(q)}" placeholder="Search apps" aria-label="Search apps" oninput="q=this.value;list()" style="margin-bottom:14px"><div id="list"></div>`;list()}
+function list(){const a=S.apps.filter(x=>(x.name||"").toLowerCase().includes(q.toLowerCase()));
+ $("#list").innerHTML=a.map(x=>`<div class="card" onclick="show(${x.id})">${x.icon?`<img src="${x.icon}" alt="">`:'<div class="ic"></div>'}<div><b>${esc(x.name)}</b><small>${esc([x.version,x.size,x.cat].filter(Boolean).join(" · "))}</small></div></div>`).join("")||'<p class="empty">Nothing here yet.</p>'}
+function modal(h){$("#m").innerHTML=`<div class="modal" onclick="if(event.target===this)$('#m').innerHTML=''"><div class="sheet">${h}</div></div>`}
+function show(id){const x=S.apps.find(a=>a.id===id);
+ modal(`<button class="x" aria-label="Close" onclick="$('#m').innerHTML=''">✕</button><h2>${esc(x.name)}</h2>
+ ${x.icon?`<img class="ic" style="width:96px;height:96px;display:block;margin:0 auto 12px;box-shadow:0 0 30px rgba(61,139,255,.5)" src="${x.icon}" alt="">`:""}
+ ${x.safety?`<p style="text-align:center">${esc(x.safety)}</p>`:""}${x.desc?`<p>${esc(x.desc)}</p>`:""}
+ ${Object.keys(L).filter(k=>x[k]).map(k=>`<div class="row"><small>${L[k]}</small><b>${esc(x[k])}</b></div>`).join("")}
+ <button class="btn p" style="margin-top:12px" onclick="dl(${x.id})">Download</button>`)}
+async function dl(id){if(S.admin&&as==="visitor"&&S.lock)return lockSheet();
+ const r=await call("dl",{id});if(r.url)go(r.url);else if(r.error==="not_member")lockSheet();else alert(r.error||"Try again")}
+function lockSheet(){modal(`<h2>Join the channel first</h2><p>The downloads are for channel members. Join, then come back and tap the button below.</p>
+ <button class="btn p" onclick="go(CH)">Open the channel</button><button class="btn" onclick="$('#m').innerHTML='';load()">I joined, check again</button>`)}
+function tuts(){$("#v").innerHTML=`<h2>Tutorials</h2>`+(S.tuts.map(t=>`<div class="card" style="display:block;cursor:default">${t.title?`<b>${esc(t.title)}</b>`:""}${t.text?`<p style="margin:6px 0 0;white-space:pre-wrap">${esc(t.text)}</p>`:""}${t.video?`<button class="btn" style="margin-top:12px" onclick="go('${esc(t.video)}')">Watch the video</button>`:""}</div>`).join("")||'<p class="empty">Nothing here yet.</p>')}
+function social(){$("#v").innerHTML=`<h2>Social</h2><div class="card" onclick="go(CH)"><div class="ic" style="display:grid;place-items:center;font-size:26px">✈</div><div><b>Telegram</b><small>Tap to open</small></div></div>`}
+function more(){$("#v").innerHTML=`<h2>More</h2><button class="btn" onclick="info('About','Sito eFootball shares mods for eFootball. New releases and news are posted first in our Telegram channel.')">About</button><button class="btn" onclick="info('Privacy','We only see your Telegram name and ID to check that you joined the channel, and to count visits and downloads. We show no ads and sell nothing.')">Privacy</button>`}
+function info(t,b){modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${t}</h2><p>${b}</p>`)}
+// ---------- admin ----------
+const AF=[["name","App name"],["version","Version"],["publisher","Publisher"],["req","Requirements"],["cat","Category"],["size","Size"],["price","Price"],["safety","Safety label"],["desc","Description","t"],["url","MediaFire link"]],TF=[["title","Title"],["text","Text","t"],["video","Telegram video link"]];
+async function admin(){$("#v").innerHTML='<p class="empty">Loading…</p>';const s=await call("stats");const n=id=>(s.per?.find(p=>p.app===id)?.c)||0;
+ $("#v").innerHTML=`<h2>Admin</h2><div class="row"><small>Visitors</small><b>${s.visits??0} total · ${s.today??0} today</b></div><div class="row"><small>Downloads</small><b>${s.downloads??0}</b></div>
+ <div class="row"><small>Require channel join</small><button class="btn ${S.lock?"p":""}" onclick="lk()">${S.lock?"On (tap to turn off)":"Off (tap to turn on)"}</button></div>
+ <small style="color:var(--dim)">View as</small><div class="seg"><button class="btn" onclick="as='member';draw()">Member</button><button class="btn" onclick="as='visitor';draw()">Visitor</button></div>
+ <h3>Apps</h3>${S.apps.map(x=>`<div class="row"><b>${esc(x.name)}</b> <small>${n(x.id)} downloads</small><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="form('apps',${x.id})">Edit</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="form('apps')">Add app</button>
+ <h3>Tutorials</h3>${S.tuts.map(x=>`<div class="row"><b>${esc(x.title||"Untitled")}</b><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="form('tuts',${x.id})">Edit</button><button class="btn" onclick="del('tuts',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="form('tuts')">Add tutorial</button>`}
+async function lk(){await call("admin",{op:"lock",v:!S.lock});S.lock=!S.lock;admin()}
+async function del(kind,id){if(confirm("Delete this?")){await call("admin",{op:"del",kind,id});await load();tab="admin";draw()}}
+function form(kind,id){const fs=kind==="apps"?AF:TF,d=S[kind].find(x=>x.id===id)||{};F={kind,id,d:{...d}};
+ modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${id?"Edit":"Add"}</h2><p>Leave a field empty and it won’t show on the site.</p>
+ ${kind==="apps"?`<div class="fr"><input type="file" accept="image/*" onchange="pick(this)"><b onclick="F.d.icon='';$('#pv').src=''">✕</b></div><img id="pv" class="ic" src="${F.d.icon||""}" alt="" style="margin-bottom:8px">`:""}
+ ${fs.map(([k,l,t])=>`<div class="fr">${t?`<textarea id="f_${k}" rows="3" placeholder="${l}">${esc(d[k])}</textarea>`:`<input id="f_${k}" placeholder="${l}" value="${esc(d[k])}">`}<b onclick="$('#f_${k}').value=''">✕</b></div>`).join("")}
+ <button class="btn p" onclick="save()">Save</button>`)}
+function pick(inp){const f=inp.files[0];if(!f)return;const i=new Image();i.onload=()=>{const c=document.createElement("canvas");c.width=c.height=192;const m=Math.min(i.width,i.height);c.getContext("2d").drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,192,192);F.d.icon=c.toDataURL("image/webp",.8);$("#pv").src=F.d.icon};i.src=URL.createObjectURL(f)}
+async function save(){const fs=F.kind==="apps"?AF:TF,data={};fs.forEach(([k])=>{const v=$("#f_"+k).value.trim();if(v)data[k]=v});if(F.d.icon)data.icon=F.d.icon;
+ const r=await call("admin",{op:"save",kind:F.kind,id:F.id,data});if(r.ok){$("#m").innerHTML="";await load();tab="admin";draw()}else alert(r.error||"Could not save")}
+load();
+</script></body></html>
