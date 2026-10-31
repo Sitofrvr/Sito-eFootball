@@ -52,14 +52,14 @@ const API="https://sito.olydccx.workers.dev", CH="https://t.me/efootxifriendly";
 // =====================
 const tg=window.Telegram?.WebApp;tg?.ready();tg?.expand();
 const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let S={apps:[],tuts:[],lock:true,member:false,admin:false,preview:false},tab="home",as="owner",q="",F={},asked=false;
+let S={apps:[],tuts:[],lock:true,member:false,admin:false,preview:false},tab="home",as="owner",q="",F={},asked=false,boot=true;
 const call=async(p,b={})=>{try{return await(await fetch(API+"/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg?.initData||"",key:localStorage.getItem("k")||"",session:localStorage.getItem("ss")||"",...b})})).json()}catch{return{error:"network"}}};
 const go=u=>/t\.me/.test(u)&&tg?tg.openTelegramLink(u):tg?tg.openLink(u):window.open(u,"_blank");
 const mem=()=>S.admin?as!=="visitor":S.member;
 const L={version:"Version",publisher:"Publisher",req:"Requirements",cat:"Category",size:"Size",price:"Price"};
 async function load(){const m=location.hash.match(/^#c=([0-9a-f]+)$/);if(m){history.replaceState(null,"",location.pathname);const x=await call("redeem",{code:m[1]});if(x.session)localStorage.setItem("ss",x.session);else alert("This link expired. Open the site in Telegram and make a new one.")}
  const r=await call("init");if(r.error){$("#v").innerHTML='<p class="empty">Can’t reach the server. Try again later.</p>';return}
- S={...S,...r};if(location.hash==="#admin"&&S.preview&&!S.admin&&!asked){asked=true;const k=prompt("Preview key");if(k){localStorage.setItem("k",k);return load()}}draw()}
+ S={...S,...r};if(boot){boot=false;if(S.admin&&/[?&]tab=admin/.test(location.search))tab="admin"}if(location.hash==="#admin"&&S.preview&&!S.admin&&!asked){asked=true;const k=prompt("Preview key");if(k){localStorage.setItem("k",k);return load()}}draw()}
 function draw(){
  const tabs=[["home","Home"],["apps","Apps"],["tuts","Tutorials"],["social","Social"],["more","More"]];if(S.admin&&as==="owner")tabs.push(["admin","Admin"]);
  $("#nav").innerHTML=tabs.map(([k,n])=>`<button class="${tab===k?"on":""}" onclick="tab='${k}';draw()">${n}</button>`).join("");
