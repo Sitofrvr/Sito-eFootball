@@ -9,12 +9,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="logo.png">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="lang.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#050b1c;--card:#0a1530;--line:#1b3a73;--blue:#3d8bff;--ice:#9ad7ff;--txt:#e8f1ff;--dim:#8ea6cc}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.5 system-ui,sans-serif}
 body{padding:0 0 calc(76px + env(safe-area-inset-bottom));padding-top:env(safe-area-inset-top)}
-h1,h2,h3,.nav button{font-family:"Chakra Petch",system-ui,sans-serif}
+h1,h2,h3,.nav button,.cd b{font-family:"Chakra Petch",system-ui,sans-serif}
 main{max-width:560px;margin:0 auto;padding:22px 18px}
 .hero{text-align:center;padding-top:10px}
 .logo{width:190px;height:190px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 0 0 6px #0b1d46,0 0 60px 14px rgba(61,139,255,.55)}
@@ -22,6 +23,7 @@ h1{font-size:34px;margin:28px 0 6px}h2{font-size:26px;margin:6px 0 16px}
 p{color:var(--dim);margin:0 0 16px}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;border-radius:26px;border:1.5px solid var(--blue);background:#0b1e48;color:var(--txt);font:500 16px system-ui;cursor:pointer;text-decoration:none;padding:10px 18px}
 .btn.p{background:var(--blue);color:#02112b;font-weight:700}.btn+.btn{margin-top:10px}
+.btn.dn{background:#c0392b;border-color:#c0392b;color:#fff}.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn:focus-visible,input:focus-visible,textarea:focus-visible,.nav button:focus-visible{outline:3px solid var(--ice);outline-offset:2px}
 input,textarea{width:100%;background:#071230;border:1.5px solid var(--line);border-radius:14px;color:var(--txt);padding:12px 14px;font:16px system-ui;margin:0}
 .card{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px;cursor:pointer}
@@ -35,96 +37,184 @@ input,textarea{width:100%;background:#071230;border:1.5px solid var(--line);bord
 .row{background:#071230;border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:8px}.row small{display:block;color:var(--dim)}
 .x{float:right;background:none;border:1.5px solid var(--blue);color:var(--txt);border-radius:50%;width:38px;height:38px;font-size:18px;cursor:pointer}
 .fr{display:flex;gap:6px;margin-bottom:8px}.fr b{cursor:pointer;padding:10px;color:var(--dim)}
-.bar{background:var(--blue);color:#02112b;text-align:center;padding:8px;font-weight:700;position:sticky;top:0}
+.bar{background:var(--blue);color:#02112b;text-align:center;padding:8px;font-weight:700;position:sticky;top:0;z-index:5}.bar.red{background:#c0392b;color:#fff}.bar u{cursor:pointer;margin:0 4px}
 .seg{display:flex;gap:6px;margin-bottom:14px}.seg .btn{min-height:42px;font-size:14px}.empty{text-align:center;color:var(--dim);padding:30px 0}
-.bd{background:var(--blue);color:#02112b;font:700 11px "Chakra Petch",sans-serif;border-radius:8px;padding:2px 8px;margin-left:8px;vertical-align:middle}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 10px}.chip{background:#0b1e48;border:1px solid var(--line);color:var(--ice);border-radius:14px;padding:5px 12px;font-size:14px;cursor:pointer}
+.lab{display:block;color:var(--dim);font-size:14px}
+.bd{background:var(--blue);color:#02112b;font:700 11px "Chakra Petch",sans-serif;border-radius:8px;padding:2px 8px;margin-inline-start:8px;vertical-align:middle}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:-2px 0 10px}.chip{background:#0b1e48;border:1px solid var(--line);color:var(--ice);border-radius:14px;padding:5px 12px;font-size:14px;cursor:pointer}.chip.on{background:var(--blue);color:#02112b;border-color:var(--blue)}
 .ths{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}.th{position:relative;display:inline-block;margin:6px 0}.th img{width:92px;height:92px;object-fit:cover;border-radius:10px;display:block}.th b{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.65);border-radius:50%;width:26px;height:26px;display:grid;place-items:center;cursor:pointer;font-size:13px}
 .lb{position:fixed;inset:0;background:rgba(2,6,15,.94);z-index:20;display:flex;align-items:center;justify-content:center}.lb img{max-width:100%;max-height:82vh;object-fit:contain}.lbx{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;background:#0a1530}
 .ar{position:absolute;top:50%;transform:translateY(-50%);background:rgba(10,21,48,.85);border:1.5px solid var(--blue);color:var(--txt);width:46px;height:46px;border-radius:50%;font-size:28px;line-height:1;cursor:pointer}.ar.l{left:10px}.ar.r{right:10px}
 .ct{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:var(--dim)}
 .hv{position:relative}.hv img{width:100%;aspect-ratio:16/10;object-fit:contain;background:#071230;border-radius:16px;border:1px solid var(--line);display:block;cursor:zoom-in}.hv .ar{width:40px;height:40px;font-size:24px}
 .dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:6px;pointer-events:none}.dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4)}.dots i.on{background:#fff}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}.tag{background:#0b1e48;border:1px solid var(--line);color:var(--ice);border-radius:10px;padding:1px 9px;font-size:12px}
+.rc{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:16px;cursor:pointer}.rimg{min-height:150px;background:#071230}.rimg img{width:100%;height:auto;display:block}.rb{padding:14px}.rb b{font-size:18px}.rb small{display:block;color:var(--dim);margin:2px 0 4px}.rb p{margin:6px 0 0}
+.lkb{display:inline-flex;align-items:center;gap:6px;background:#0b1e48;border:1.5px solid var(--line);color:var(--txt);border-radius:20px;padding:6px 14px;font:500 16px system-ui;cursor:pointer;margin:0 0 12px}.lkb.on{color:#ff6b8a;border-color:#ff6b8a}
+.ck{display:flex;gap:10px;align-items:center;color:var(--txt);margin:0 0 10px}.ck input{width:22px;height:22px;flex:none}
+.mt{padding-top:30px}.sp{position:relative;width:170px;height:170px;margin:0 auto 10px}.sp img{position:absolute;inset:20px;width:130px;height:130px;border-radius:50%;object-fit:cover;border:2px solid #fff}
+.sp:before{content:"";position:absolute;inset:0;border-radius:50%;border:6px solid rgba(61,139,255,.2);border-top-color:var(--blue);animation:rot 1s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.sp:before{animation-duration:3s}}
+.cd{display:flex;gap:10px;justify-content:center;margin:18px 0}.cd div{background:#0b1e48;border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:64px}.cd b{font-size:26px;display:block}.cd small{color:var(--dim);font-size:12px}
 </style></head>
 <body>
 <div id="bar"></div><main id="v"></main>
 <nav class="nav" id="nav"></nav><div id="m"></div><div id="m2"></div>
 <script>
-// ===== EDIT THIS =====
 const API="https://sito.olydccx.workers.dev", CH="https://t.me/efootxifriendly", MINI="https://t.me/SitoAgentBOT/Sito";
-// =====================
 if(!localStorage.getItem("vid"))localStorage.setItem("vid",Math.random().toString(36).slice(2,12)+Date.now().toString(36));
 const tg=window.Telegram?.WebApp;tg?.ready();tg?.expand();
+const TT=window.T||{en:{}};
 const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let S={apps:[],tuts:[],lock:true,member:false,admin:false,preview:false},tab="home",as="owner",q="",F={},asked=false,boot=true;
+const LANGS=[["en","🇬🇧","English"],["es","🇪🇸","Español"],["ar","🇸🇦","العربية"],["hi","🇮🇳","हिन्दी"],["bn","🇧🇩","বাংলা"],["ja","🇯🇵","日本語"],["ko","🇰🇷","한국어"],["ru","🇷🇺","Русский"],["de","🇩🇪","Deutsch"],["id","🇮🇩","Bahasa Indonesia"],["ms","🇲🇾","Bahasa Melayu"],["pt","🇧🇷","Português (Brasil)"]];
+let LG=(()=>{const s=localStorage.getItem("lg");if(s&&TT[s])return s;const b=String(tg?.initDataUnsafe?.user?.language_code||navigator.language||"en").toLowerCase().split("-")[0];return TT[b]?b:"en"})();
+const tr=k=>(TT[LG]&&TT[LG][k])||TT.en[k]||k;
+const applyDir=()=>{document.documentElement.lang=LG;document.documentElement.dir=LG==="ar"?"rtl":"ltr"};applyDir();
+let S={apps:[],tuts:[],lock:true,member:false,admin:false,preview:false,maint:null},tab="home",as="owner",q="",F={},asked=false,boot=true,FT=[],SORT="new",LD=null,W=false,IM=[],IMi=0,HI=0,tx=0,AT,MT,CT,CF,RP={};
+const TH={},TAGS=["iOS","Android","Online","Offline"];
 const call=async(p,b={})=>{try{return await(await fetch(API+"/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg?.initData||"",key:localStorage.getItem("k")||"",session:localStorage.getItem("ss")||"",vid:localStorage.getItem("vid")||"",...b})})).json()}catch{return{error:"network"}}};
 const go=u=>/t\.me/.test(u)&&tg?tg.openTelegramLink(u):tg?tg.openLink(u):window.open(u,"_blank");
 const mem=()=>S.admin?as!=="visitor":S.member;
-const L={version:"Version",publisher:"Publisher",req:"Requirements",cat:"Category",size:"Size",price:"Price"};
-async function load(){const m=location.hash.match(/^#c=([0-9a-f]+)$/);if(m){history.replaceState(null,"",location.pathname);const x=await call("redeem",{code:m[1]});if(x.session)localStorage.setItem("ss",x.session);else alert("This link expired. Open the site in Telegram and make a new one.")}
- const r=await call("init");if(r.error){$("#v").innerHTML='<p class="empty">Can’t reach the server. Try again later.</p>';return}
- S={...S,...r};if(boot){boot=false;if(S.admin&&/[?&]tab=admin/.test(location.search))tab="admin"}if(location.hash==="#admin"&&S.preview&&!S.admin&&!asked){asked=true;const k=prompt("Preview key");if(k){localStorage.setItem("k",k);return load()}}draw()}
-function draw(){
- const tabs=[["home","Home"],["apps","Apps"],["tuts","Tutorials"],["social","Social"],["more","More"]];if(S.admin&&as==="owner")tabs.push(["admin","Admin"]);
- $("#nav").innerHTML=tabs.map(([k,n])=>`<button class="${tab===k?"on":""}" onclick="tab='${k}';draw()">${n}</button>`).join("");
- $("#bar").innerHTML=S.admin&&as!=="owner"?`<div class="bar">Previewing as ${as==="member"?"Member":"Visitor"} · <u onclick="as='owner';draw()">Exit</u></div>`:"";
- if(!tg?.initData&&!S.member&&S.lock&&!S.admin){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>Opening Sito eFootball in Telegram…</p><a class="btn p" href="${MINI}">Open in Telegram</a><a class="btn" href="${CH}">Join the channel</a></div>`;$("#nav").innerHTML="";if(!sessionStorage.getItem("rd")){sessionStorage.setItem("rd","1");setTimeout(()=>{location.href=MINI},1200)}return}
- ({home,apps,tuts,social,more,admin})[tab]();window.scrollTo(0,0)}
-function home(){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>Welcome to Sito Web! Here you can find all the mods published. Join my telegram for advanced news!</p>
-<button class="btn p" onclick="go(CH)">Join our Telegram</button><br><input placeholder="Search apps and tutorials" aria-label="Search apps and tutorials" oninput="gs(this.value)" style="margin-top:14px"></div><div id="sug" style="margin-top:14px"></div>`}
+const mOn=()=>!!(S.maint&&S.maint.on&&(!S.maint.end||Date.now()/1000<S.maint.end));
 const hay=(o,ks)=>ks.map(k=>o[k]||"").join(" ").toLowerCase();
-const TH={};
-const ico=x=>x.icon?`<img src="${x.icon}" alt="">`:`<div class="ic" data-ic="${x.id}"></div>`;
-async function fi(){for(const e of document.querySelectorAll("[data-ic]")){const id=+e.dataset.ic;if(!(id in TH)){const r=await call("app",{id});TH[id]=r.img||""}if(TH[id])e.outerHTML=`<img src="${TH[id]}" alt="">`}}
-function gs(v){v=v.trim().toLowerCase();const el=$("#sug");if(!v){el.innerHTML="";return}
- const a=S.apps.filter(x=>hay(x,["name","version","cat","publisher","desc","log"]).includes(v)).slice(0,6),t=S.tuts.filter(x=>hay(x,["title","text"]).includes(v)).slice(0,6);
- el.innerHTML=(a.map(x=>`<div class="card" onclick="show(${x.id})">${ico(x)}<div><b>${esc(x.name)}</b><small>App${x.version?" · "+esc(x.version):""}</small></div></div>`).join("")+t.map(x=>`<div class="card" onclick="tshow(${x.id})"><div class="ic" style="display:grid;place-items:center;font-size:22px">▶</div><div><b>${esc(x.title||"Tutorial")}</b><small>Tutorial</small></div></div>`).join(""))||'<p class="empty">No results.</p>';fi()}
-function tshow(id){const t=S.tuts.find(x=>x.id===id);modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${esc(t.title||"Tutorial")}</h2>${t.text?`<p style="white-space:pre-wrap">${esc(t.text)}</p>`:""}${t.video?`<button class="btn p" onclick="go('${esc(t.video)}')">Watch the video</button>`:""}`)}
-function apps(){$("#v").innerHTML=`<h2>Apps</h2><input value="${esc(q)}" placeholder="Search apps" aria-label="Search apps" oninput="q=this.value;rl()" style="margin-bottom:14px"><div id="list"></div>`;rl()}
-function rl(){const a=S.apps.filter(x=>(x.name||"").toLowerCase().includes(q.toLowerCase()));
- $("#list").innerHTML=a.map(x=>`<div class="card" onclick="show(${x.id})">${ico(x)}<div><b>${esc(x.name)}${bd(x)?`<span class="bd">${bd(x)}</span>`:""}</b><small>${esc([x.version,x.size,x.cat].filter(Boolean).join(" · "))}</small></div></div>`).join("")||'<p class="empty">Nothing here yet.</p>';fi()}
+const bd=x=>{const n=Date.now()/1000;return n-x.t<604800?tr("b_new"):n-x.u<604800?tr("b_upd"):""};
+const bdh=x=>bd(x)?`<span class="bd">${bd(x)}</span>`:"";
+const tagsHtml=x=>x.tags?.length?`<div class="tags">${x.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:"";
+const L={version:"l_version",publisher:"l_publisher",req:"l_req",cat:"l_cat",size:"l_size",price:"l_price"};
+const dstr=t=>t?new Date(t*1000).toLocaleDateString(LG,{month:"short",day:"numeric",year:"numeric"}):"";
 function modal(h){$("#m").innerHTML=`<div class="modal" onclick="if(event.target===this)$('#m').innerHTML=''"><div class="sheet">${h}</div></div>`}
-function show(id){const x=S.apps.find(a=>a.id===id);
- modal(`<button class="x" aria-label="Close" onclick="$('#m').innerHTML=''">✕</button><h2>${esc(x.name)}${bd(x)?`<span class="bd">${bd(x)}</span>`:""}</h2>
+const xb=`<button class="x" aria-label="Close" onclick="$('#m').innerHTML=''">✕</button>`;
+
+async function load(){const m=location.hash.match(/^#c=([0-9a-f]+)$/);
+ if(m){history.replaceState(null,"",location.pathname);const x=await call("redeem",{code:m[1]});if(x.session)localStorage.setItem("ss",x.session);else alert("This link expired. Open the site in Telegram and make a new one.")}
+ const r=await call("init");if(r.error){$("#v").innerHTML=`<p class="empty">${tr("err_srv")}</p>`;return}
+ S={...S,...r};
+ if(boot){boot=false;if(S.admin&&/[?&]tab=admin/.test(location.search))tab="admin"}
+ if(location.hash==="#admin"&&S.preview&&!S.admin&&!asked){asked=true;const k=prompt("Preview key");if(k){localStorage.setItem("k",k);return load()}}
+ draw()}
+
+function draw(){clearInterval(MT);clearInterval(AT);
+ if(mOn()&&(!S.admin||as!=="owner"))return maint();
+ const tabs=[["home","nav_home"],["apps","nav_apps"],["tuts","nav_tuts"],["social","nav_social"],["more","nav_more"]].map(([k,n])=>[k,tr(n)]);if(S.admin&&as==="owner")tabs.push(["admin","Admin"]);
+ $("#nav").innerHTML=tabs.map(([k,n])=>`<button class="${tab===k?"on":""}" onclick="tab='${k}';draw()">${n}</button>`).join("");
+ $("#bar").innerHTML=S.admin&&as!=="owner"?`<div class="bar">Previewing as ${as==="member"?"Member":"Visitor"} · <u onclick="as='owner';draw()">Exit</u></div>`:S.admin&&mOn()?`<div class="bar red">Maintenance is ON · <u onclick="mtOpen()">Edit</u> · <u onclick="mtOff()">Turn off</u></div>`:"";
+ if(!tg?.initData&&!S.member&&S.lock&&!S.admin){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>${tr("gate_t")}</p><a class="btn p" href="${MINI}">${tr("gate_b")}</a></div>`;$("#nav").innerHTML="";if(!sessionStorage.getItem("rd")){sessionStorage.setItem("rd","1");setTimeout(()=>{location.href=MINI},1200)}return}
+ ({home,apps,tuts,social,more,admin})[tab]();window.scrollTo(0,0)}
+
+// ---------- maintenance screen ----------
+function maint(){const m=S.maint||{},end=m.end||0;$("#nav").innerHTML="";
+ $("#bar").innerHTML=S.admin?`<div class="bar">Previewing as ${as==="member"?"Member":"Visitor"} · <u onclick="as='owner';draw()">Exit</u></div>`:"";
+ $("#v").innerHTML=`<div class="hero mt"><div class="sp"><img src="logo.png" alt=""></div><h1>${esc(m.title||tr("mt_title"))}</h1>${m.msg?`<p style="white-space:pre-wrap">${esc(m.msg)}</p>`:""}${end&&m.cd?`<div class="cd" id="cd"></div>`:""}${end?`<p>${tr("mt_ends")}: <b>${esc(new Date(end*1000).toLocaleString(LG,{dateStyle:"medium",timeStyle:"short"}))}</b></p>`:""}${m.btn?`<button class="btn p" onclick="go(CH)">${tr("mt_join")}</button>`:""}</div>`;
+ if(end&&m.cd){const tick=()=>{const s=Math.max(0,end-Math.floor(Date.now()/1000)),e=$("#cd");if(!e)return;
+  e.innerHTML=[[Math.floor(s/86400),"mt_d"],[Math.floor(s%86400/3600),"mt_h"],[Math.floor(s%3600/60),"mt_m"],[s%60,"mt_s"]].map(([n,l])=>`<div><b>${String(n).padStart(2,"0")}</b><small>${tr(l)}</small></div>`).join("");
+  if(s<=0){clearInterval(MT);setTimeout(load,3000)}};tick();MT=setInterval(tick,1000)}
+ else if(end)MT=setTimeout(load,Math.min(3e8,Math.max(1000,end*1000-Date.now()+1500)))}
+
+// ---------- home ----------
+function home(){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>${tr("welcome")}</p><button class="btn p" onclick="go(CH)">${tr("join_tg")}</button><br><input placeholder="${tr("search_all")}" aria-label="${tr("search_all")}" oninput="gs(this.value)" style="margin-top:14px"></div><div id="sug" style="margin-top:14px"></div><div id="rec">${rec()}</div>`;fh()}
+const getImg=async id=>{if(!(id in TH)){const r=await call("app",{id});TH[id]=r.img||""}return TH[id]};
+const ico=x=>x.icon?`<img src="${x.icon}" alt="">`:`<div class="ic" data-ic="${x.id}"></div>`;
+async function fi(){for(const e of document.querySelectorAll("[data-ic]")){const s=await getImg(+e.dataset.ic);if(s)e.outerHTML=`<img src="${s}" alt="">`}}
+async function fh(){for(const e of document.querySelectorAll("[data-hi]")){const s=await getImg(+e.dataset.hi);if(s)e.innerHTML=`<img src="${s}" alt="">`}}
+const rec=()=>{const a=S.apps.slice(0,5);return a.length?`<h3 style="margin:22px 0 12px">${tr("recent")}</h3>`+a.map(x=>{const t=x.desc||x.log||"",ex=t.length>110?t.slice(0,110).trimEnd()+"..":t;
+ return `<div class="rc" onclick="show(${x.id})"><div class="rimg" data-hi="${x.id}"></div><div class="rb"><b>${esc(x.name)}</b>${bdh(x)}<small>${esc([x.version,x.size,dstr(x.t)].filter(Boolean).join(" · "))}${x.lk?` · ♥ ${x.lk}`:""}</small>${tagsHtml(x)}${ex?`<p>${esc(ex)}</p>`:""}</div></div>`}).join(""):""};
+function gs(v){v=v.trim().toLowerCase();const el=$("#sug"),rc=$("#rec");rc.style.display=v?"none":"";if(!v){el.innerHTML="";return}
+ const a=S.apps.filter(x=>hay(x,["name","version","cat","publisher","desc","log","tags"]).includes(v)).slice(0,6),t=S.tuts.filter(x=>hay(x,["title","text"]).includes(v)).slice(0,6);
+ el.innerHTML=(a.map(x=>`<div class="card" onclick="show(${x.id})">${ico(x)}<div><b>${esc(x.name)}</b><small>${tr("k_app")}${x.version?" · "+esc(x.version):""}</small></div></div>`).join("")+t.map(x=>`<div class="card" onclick="tshow(${x.id})"><div class="ic" style="display:grid;place-items:center;font-size:22px">▶</div><div><b>${esc(x.title||tr("k_tut"))}</b><small>${tr("k_tut")}</small></div></div>`).join(""))||`<p class="empty">${tr("no_res")}</p>`;fi()}
+
+// ---------- apps ----------
+function apps(){const SO=[["new","s_new"],["old","s_old"],["liked","s_liked"],["viewed","s_viewed"]];
+ $("#v").innerHTML=`<h2>${tr("nav_apps")}</h2><input value="${esc(q)}" placeholder="${tr("search_apps")}" aria-label="${tr("search_apps")}" oninput="q=this.value;rl()" style="margin-bottom:10px">
+ <small class="lab">${tr("sort")}</small><div class="chips" style="margin:2px 0 10px">${SO.map(([k,l])=>`<span class="chip ${SORT===k?"on":""}" onclick="srt('${k}')">${tr(l)}</span>`).join("")}</div>
+ <small class="lab">${tr("filter")}</small><div class="chips" style="margin:2px 0 12px"><span class="chip ${FT.length?"":"on"}" onclick="ftg('')">${tr("all")}</span>${TAGS.map(t=>`<span class="chip ${FT.includes(t)?"on":""}" onclick="ftg('${t}')">${t}</span>`).join("")}</div><div id="list"></div>`;rl()}
+const srt=s=>{SORT=s;apps()},ftg=t=>{FT=t?(FT.includes(t)?FT.filter(x=>x!==t):[...FT,t]):[];apps()};
+function rl(){const n=q.toLowerCase(),d=x=>x.t||0;
+ const a=S.apps.filter(x=>hay(x,["name","version","cat","publisher","tags"]).includes(n)&&FT.every(t=>(x.tags||[]).includes(t)));
+ a.sort(SORT==="old"?(x,y)=>d(x)-d(y)||x.id-y.id:SORT==="liked"?(x,y)=>(y.lk||0)-(x.lk||0)||d(y)-d(x):SORT==="viewed"?(x,y)=>(y.vw||0)-(x.vw||0)||d(y)-d(x):(x,y)=>d(y)-d(x)||y.id-x.id);
+ $("#list").innerHTML=a.map(x=>`<div class="card" onclick="show(${x.id})">${ico(x)}<div><b>${esc(x.name)}${bdh(x)}</b><small>${esc([x.version,x.size,x.cat].filter(Boolean).join(" · "))}${x.lk?` · ♥ ${x.lk}`:""}</small>${tagsHtml(x)}</div></div>`).join("")||`<p class="empty">${tr("none")}</p>`;fi()}
+function show(id){const x=S.apps.find(a=>a.id===id);if(!x)return;
+ modal(`${xb}<h2>${esc(x.name)}${bdh(x)}</h2>${tagsHtml(x)}
  <div id="hero">${x.icon?`<img class="ic" style="width:96px;height:96px;display:block;margin:0 auto 12px;box-shadow:0 0 30px rgba(61,139,255,.5)" src="${x.icon}" alt="">`:""}</div>
- ${x.safety?`<p style="text-align:center">${esc(x.safety)}</p>`:""}${x.desc?`<p>${esc(x.desc)}</p>`:""}${x.log?`<div class="row"><small>What’s new</small><b style="white-space:pre-wrap">${esc(x.log)}</b></div>`:""}
- ${Object.keys(L).filter(k=>x[k]).map(k=>`<div class="row"><small>${L[k]}</small><b>${esc(x[k])}</b></div>`).join("")}
- <button class="btn p" style="margin-top:12px" onclick="dl(${x.id})">Download</button>${tg?.initData||localStorage.getItem("ss")?`<button class="btn" style="margin-top:10px" onclick="rp(${x.id})">Report a broken link</button>`:""}`);loadHero(x.id)}
-async function dl(id){if(S.admin&&as==="visitor"&&S.lock)return lockSheet();
- const r=await call("dl",{id});if(r.url)go(r.url);else if(r.error==="not_member")lockSheet();else alert(r.error||"Try again")}
-const bd=x=>{const n=Date.now()/1000;return n-x.t<604800?"New":n-x.u<604800?"Updated":""};
-async function rp(id){const r=await call("report",{id});alert(r.ok?"Thanks! The owner has been told.":r.error||"Try again")}
-let IM=[],IMi=0,tx=0;
-let HI=0;
-function loadHero(id){call("app",{id}).then(r=>{if(!r.img||!$("#hero"))return;IM=[r.img,...(r.shots||[])];HI=0;const n=IM.length;$("#hero").style.marginBottom="12px";$("#hero").innerHTML=`<div class="hv" ontouchstart="tx=event.touches[0].clientX" ontouchend="hsw(event)"><img id="hi" src="${IM[0]}" alt="" onclick="view(HI)">${n>1?`<button class="ar l" aria-label="Previous image" onclick="hs(-1)">‹</button><button class="ar r" aria-label="Next image" onclick="hs(1)">›</button><div class="dots">${IM.map((_,i)=>`<i class="${i?"":"on"}"></i>`).join("")}</div>`:""}</div>`})}
+ <button class="lkb${x.me?" on":""}" id="lkb" ${x.me?"disabled":""} onclick="likeIt(${x.id})" aria-label="Like">♥ <span id="lc">${x.lk||0}</span></button>
+ ${x.safety?`<p style="text-align:center">${esc(x.safety)}</p>`:""}${x.desc?`<p>${esc(x.desc)}</p>`:""}${x.log?`<div class="row"><small>${tr("whats_new")}</small><b style="white-space:pre-wrap">${esc(x.log)}</b></div>`:""}
+ ${Object.keys(L).filter(k=>x[k]).map(k=>`<div class="row"><small>${tr(L[k])}</small><b>${esc(x[k])}</b></div>`).join("")}
+ ${x.pa?`<button class="btn p" style="margin-top:12px" onclick="dl(${x.id},'a')">${tr("dl_android")}</button>`:""}${x.pi?`<button class="btn${x.pa?"":" p"}" style="margin-top:10px" onclick="dl(${x.id},'i')">${tr("dl_ios")}</button>`:""}${tg?.initData||localStorage.getItem("ss")?`<button class="btn" style="margin-top:10px" onclick="rpOpen(${x.id})">${tr("report")}</button>`:""}`);
+ loadHero(x.id);call("view",{id:x.id})}
+async function likeIt(id){if(!tg?.initData&&!localStorage.getItem("ss"))return alert(tr("like_need"));const r=await call("like",{id});
+ if(r.ok){const x=S.apps.find(a=>a.id===id);x.lk=r.lk;x.me=true;const b=$("#lkb");if(b){b.classList.add("on");b.disabled=true;$("#lc").textContent=r.lk}}else alert(r.error||"")}
+async function dl(id,p){LD=[id,p];if(S.admin&&as==="visitor"&&S.lock)return lockSheet();
+ const r=await call("dl",{id,p});if(r.url)go(r.url);else if(r.error==="not_member")lockSheet();else alert(r.error||tr("err_srv"))}
+function lockSheet(){W=true;modal(`<h2>${tr("lock_t")}</h2><p>${tr("lock_p")}</p><button class="btn p" onclick="go(CH)">${tr("open_ch")}</button><button class="btn" onclick="resume(1)">${tr("joined")}</button>`)}
+async function resume(m){if(!W)return;await load();if(mem()){W=false;$("#m").innerHTML="";if(LD)dl(LD[0],LD[1])}else if(m)alert(tr("not_yet"))}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)resume()});tg?.onEvent?.("activated",()=>resume());
+
+// ---------- hero carousel and viewer ----------
+function loadHero(id){call("app",{id}).then(r=>{if(!r.img||!$("#hero"))return;IM=[r.img,...(r.shots||[])];HI=0;const n=IM.length;$("#hero").style.marginBottom="12px";
+ $("#hero").innerHTML=`<div class="hv" ontouchstart="tx=event.touches[0].clientX" ontouchend="hsw(event)"><img id="hi" src="${IM[0]}" alt="" onclick="view(HI)">${n>1?`<button class="ar l" aria-label="Previous image" onclick="hs(-1)">‹</button><button class="ar r" aria-label="Next image" onclick="hs(1)">›</button><div class="dots">${IM.map((_,i)=>`<i class="${i?"":"on"}"></i>`).join("")}</div>`:""}</div>`})}
 function hs(d){const n=IM.length;HI=(HI+d+n)%n;$("#hi").src=IM[HI];document.querySelectorAll(".dots i").forEach((e,i)=>e.className=i===HI?"on":"")}
 const hsw=e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)hs(d<0?1:-1)};
 function view(i){const n=IM.length;IMi=(i+n)%n;$("#m2").innerHTML=`<div class="lb" ontouchstart="tx=event.touches[0].clientX" ontouchend="sw(event)"><button class="x lbx" aria-label="Close" onclick="$('#m2').innerHTML=''">✕</button>${n>1?`<button class="ar l" aria-label="Previous" onclick="view(IMi-1)">‹</button><button class="ar r" aria-label="Next" onclick="view(IMi+1)">›</button><div class="ct">${IMi+1} / ${n}</div>`:""}<img src="${IM[IMi]}" alt=""></div>`}
 const sw=e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)view(IMi+(d<0?1:-1))};
-function lockSheet(){modal(`<h2>Join the channel first</h2><p>The downloads are for channel members. Join, then come back and tap the button below.</p>
- <button class="btn p" onclick="go(CH)">Open the channel</button><button class="btn" onclick="$('#m').innerHTML='';load()">I joined, check again</button>`)}
-function tuts(){$("#v").innerHTML=`<h2>Tutorials</h2>`+(S.tuts.map(t=>`<div class="card" style="display:block;cursor:default">${t.title?`<b>${esc(t.title)}</b>`:""}${t.text?`<p style="margin:6px 0 0;white-space:pre-wrap">${esc(t.text)}</p>`:""}${t.video?`<button class="btn" style="margin-top:12px" onclick="go('${esc(t.video)}')">Watch the video</button>`:""}</div>`).join("")||'<p class="empty">Nothing here yet.</p>')}
-function social(){$("#v").innerHTML=`<h2>Social</h2><div class="card" onclick="go(CH)"><div class="ic" style="display:grid;place-items:center;font-size:26px">✈</div><div><b>Telegram</b><small>Tap to open</small></div></div>`}
-function more(){$("#v").innerHTML=`<h2>More</h2>${extra()}<button class="btn" onclick="info('About','Sito eFootball shares mods for eFootball. New releases and news are posted first in our Telegram channel.')">About</button><button class="btn" onclick="info('Privacy','We only see your Telegram name and ID to check that you joined the channel, and to count visits and downloads. We show no ads and sell nothing.')">Privacy</button>`}
-function info(t,b){modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${t}</h2><p>${b}</p>`)}
-const extra=()=>tg?.initData?'<button class="btn p" style="margin-bottom:10px" onclick="mk()">Use in my browser</button>':localStorage.getItem("ss")?'<button class="btn" style="margin-bottom:10px" onclick="so()">Sign out of this browser</button>':"";
+
+// ---------- report a broken link ----------
+function rpOpen(id){const x=S.apps.find(a=>a.id===id);RP={id,p:x.pa?"a":"i",img:""};
+ modal(`${xb}<h2>${tr("rp_title")}</h2>${x.pa&&x.pi?`<small class="lab">${tr("rp_which")}</small><div class="chips" id="rpc"><span class="chip on" onclick="rpP('a',this)">Android</span><span class="chip" onclick="rpP('i',this)">iOS</span></div>`:""}
+ <textarea id="rp_r" rows="3" placeholder="${tr("rp_reason")}" style="margin-bottom:8px"></textarea><textarea id="rp_l" rows="2" placeholder="${tr("rp_leads")}" style="margin-bottom:8px"></textarea>
+ <small class="lab">${tr("rp_img")}</small><input type="file" accept="image/*" onchange="rpImg(this)" style="margin:6px 0 12px"><div id="rpv"></div><button class="btn p" onclick="rpSend()">${tr("rp_send")}</button>`)}
+function rpP(p,e){RP.p=p;document.querySelectorAll("#rpc .chip").forEach(c=>c.classList.remove("on"));e.classList.add("on")}
+async function rpImg(e){const f=e.files[0];if(!f)return;RP.img=await shrink(f,1000,.72,0,"image/jpeg");$("#rpv").innerHTML=`<img src="${RP.img}" alt="" style="width:100%;border-radius:12px;margin-bottom:12px">`}
+async function rpSend(){const reason=$("#rp_r").value.trim(),leads=$("#rp_l").value.trim();if(!reason||!leads||!RP.img)return alert(tr("rp_need"));
+ const r=await call("report",{id:RP.id,p:RP.p,reason,leads,img:RP.img});if(r.ok){$("#m").innerHTML="";alert(tr("rp_thanks"))}else alert(r.error||"")}
+
+// ---------- tutorials, social, more ----------
+function tuts(){$("#v").innerHTML=`<h2>${tr("nav_tuts")}</h2>`+(S.tuts.map(t=>`<div class="card" style="display:block;cursor:default">${t.title?`<b>${esc(t.title)}</b>`:""}${t.text?`<p style="margin:6px 0 0;white-space:pre-wrap">${esc(t.text)}</p>`:""}${t.video?`<button class="btn" style="margin-top:12px" onclick="go('${esc(t.video)}')">${tr("watch")}</button>`:""}</div>`).join("")||`<p class="empty">${tr("none")}</p>`)}
+function tshow(id){const t=S.tuts.find(x=>x.id===id);modal(`${xb}<h2>${esc(t.title||tr("k_tut"))}</h2>${t.text?`<p style="white-space:pre-wrap">${esc(t.text)}</p>`:""}${t.video?`<button class="btn p" onclick="go('${esc(t.video)}')">${tr("watch")}</button>`:""}`)}
+function social(){$("#v").innerHTML=`<h2>${tr("nav_social")}</h2><div class="card" onclick="go(CH)"><div class="ic" style="display:grid;place-items:center;font-size:26px">✈</div><div><b>Telegram</b><small>${tr("tap_open")}</small></div></div>`}
+const extra=()=>tg?.initData?`<button class="btn p" style="margin-bottom:10px" onclick="mk()">${tr("use_br")}</button>`:localStorage.getItem("ss")?`<button class="btn" style="margin-bottom:10px" onclick="so()">${tr("sign_out")}</button>`:"";
 const so=()=>{localStorage.removeItem("ss");load()};
-async function mk(){const r=await call("link");if(!r.code)return alert(r.error||"Try again");window._u=location.origin+location.pathname+"#c="+r.code;
- modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>Your browser link</h2><p>Open it in Chrome once. It works one time and expires in 10 minutes. Don’t share it.</p><button class="btn p" onclick="tg.openLink(window._u)">Open in my browser</button><button class="btn" onclick="navigator.clipboard?.writeText(window._u).then(()=>alert('Copied'))">Copy link</button>`)}
-// ---------- admin ----------
-const AF=[["name","App name"],["version","Version"],["log","What’s new (changelog)","t"],["publisher","Publisher"],["req","Requirements"],["cat","Category"],["size","Size"],["price","Price"],["safety","Safety label"],["desc","Description","t"],["url","MediaFire link"]],TF=[["title","Title"],["text","Text","t"],["video","Telegram video link"]];
-async function admin(){$("#v").innerHTML='<p class="empty">Loading…</p>';const s=await call("admin",{op:"stats"});const n=id=>(s.per?.find(p=>p.app===id)?.c)||0;
- $("#v").innerHTML=`<h2>Admin</h2><div class="row"><small>Visitors</small><b id="sv">${s.visits??0} total · ${s.today??0} today</b></div><div class="row"><small>Downloads</small><b id="sdl">${s.downloads??0}</b></div>
+function more(){const c=LANGS.find(l=>l[0]===LG);$("#v").innerHTML=`<h2>${tr("nav_more")}</h2>${extra()}<button class="btn" onclick="lgOpen()">${c[1]} ${tr("language")} · ${c[2]}</button><button class="btn" onclick="info('about')">${tr("about")}</button><button class="btn" onclick="info('privacy')">${tr("privacy")}</button>`}
+function info(k){modal(`${xb}<h2>${tr(k)}</h2><p>${tr(k+"_t")}</p>`)}
+async function mk(){const r=await call("link");if(!r.code)return alert(r.error||"");window._u=location.origin+location.pathname+"#c="+r.code;
+ modal(`${xb}<h2>${tr("br_title")}</h2><p>${tr("br_p")}</p><button class="btn p" onclick="tg.openLink(window._u)">${tr("br_open")}</button><button class="btn" onclick="navigator.clipboard?.writeText(window._u).then(()=>alert(tr('copied')))">${tr("copy_link")}</button>`)}
+function setL(c){LG=c;localStorage.setItem("lg",c);applyDir();$("#m").innerHTML="";draw()}
+function lgOpen(){modal(`${xb}<h2>${tr("language")}</h2>${LANGS.map(([c,f,n])=>`<button class="btn${LG===c?" p":""}" onclick="setL('${c}')">${f} ${n}</button>`).join("")}<button class="btn" style="margin-top:16px" onclick="sgOpen()">✍ ${tr("suggest")}</button>`)}
+function sgOpen(){modal(`${xb}<h2>${tr("suggest")}</h2><textarea id="sg_t" rows="3" maxlength="200" placeholder="${tr("sg_ph")}" style="margin-bottom:12px"></textarea><button class="btn p" onclick="sgSend()">${tr("send")}</button>`)}
+async function sgSend(){const text=$("#sg_t").value.trim();if(!text)return;const r=await call("suggest",{text});if(r.ok){$("#m").innerHTML="";alert(tr("sg_thanks"))}else alert(r.error||"")}
+
+// ---------- admin (English only) ----------
+const ptxt=(s,id)=>`${s.per?.find(p=>p.app===id)?.c||0} downloads · ♥ ${s.likes?.find(p=>p.app===id)?.c||0} · 👁 ${s.views?.find(p=>p.app===id)?.c||0}`;
+async function admin(){$("#v").innerHTML='<p class="empty">Loading…</p>';const s=await call("admin",{op:"stats"});if(s.error){$("#v").innerHTML=`<p class="empty">${esc(s.error)}</p>`;return}
+ $("#v").innerHTML=`<h2>Admin</h2><div class="row"><small>Visitors (live)</small><b id="sv">${s.visits??0} total · ${s.today??0} today</b></div><div class="row"><small>Downloads</small><b id="sdl">${s.downloads??0}</b></div>
  <div class="row"><small>Require channel join</small><button class="btn ${S.lock?"p":""}" onclick="lk()">${S.lock?"On (tap to turn off)":"Off (tap to turn on)"}</button></div>
+ <button class="btn ${mOn()?"dn":""}" style="margin-bottom:14px" onclick="mtOpen()">Maintenance${mOn()?" (ON)":""}</button>
  <small style="color:var(--dim)">View as</small><div class="seg"><button class="btn" onclick="as='member';draw()">Member</button><button class="btn" onclick="as='visitor';draw()">Visitor</button></div>
- <h3>Apps</h3>${S.apps.map(x=>`<div class="row"><b>${esc(x.name)}</b> <small id="pa${x.id}">${n(x.id)} downloads</small><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('apps',${x.id})">Edit</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('apps')">Add app</button>
+ <h3>Apps</h3>${S.apps.map(x=>`<div class="row"><b>${esc(x.name)}</b> <small id="pa${x.id}">${ptxt(s,x.id)}</small><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('apps',${x.id})">Edit</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('apps')">Add app</button>
  <h3>Tutorials</h3>${S.tuts.map(x=>`<div class="row"><b>${esc(x.title||"Untitled")}</b><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('tuts',${x.id})">Edit</button><button class="btn" onclick="del('tuts',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('tuts')">Add tutorial</button>`;live()}
-let AT;
-function live(){clearInterval(AT);AT=setInterval(async()=>{if(tab!=="admin"||!$("#sv")){clearInterval(AT);return}const s=await call("admin",{op:"stats"});if(s.error||!$("#sv"))return;$("#sv").textContent=`${s.visits} total · ${s.today} today`;$("#sdl").textContent=s.downloads;(s.per||[]).forEach(p=>{const e=$("#pa"+p.app);if(e)e.textContent=p.c+" downloads"})},8000)}
+function live(){clearInterval(AT);AT=setInterval(async()=>{if(tab!=="admin"||!$("#sv")){clearInterval(AT);return}const s=await call("admin",{op:"stats"});if(s.error||!$("#sv"))return;
+ $("#sv").textContent=`${s.visits} total · ${s.today} today`;$("#sdl").textContent=s.downloads;S.apps.forEach(x=>{const e=$("#pa"+x.id);if(e)e.textContent=ptxt(s,x.id)})},8000)}
 async function lk(){await call("admin",{op:"lock",v:!S.lock});S.lock=!S.lock;admin()}
-async function del(kind,id){if(confirm("Delete this?")){await call("admin",{op:"del",kind,id});await load();tab="admin";draw()}}
-const PRE={name:["eFootxi","Kipas FOOTBALL","eFootball73"],publisher:["Sito (Owner)"],price:["Free"],safety:["100% Safe and Tested"]},MAND=["name","url"];
+// confirmation with a 5-second lock (Cancel is instant)
+function cfm(msg,label,fn){let n=5;modal(`<h2>${esc(msg)}</h2><button class="btn" onclick="cx()">Cancel</button><button class="btn dn" id="cb" disabled>${esc(label)} (5)</button>`);
+ clearInterval(CT);CT=setInterval(()=>{n--;const b=$("#cb");if(!b){clearInterval(CT);return}if(n>0)b.textContent=`${label} (${n})`;else{clearInterval(CT);b.disabled=false;b.textContent=label;b.onclick=()=>{$("#m").innerHTML="";fn()}}},1000)}
+const cx=()=>{clearInterval(CT);$("#m").innerHTML=""};
+function del(kind,id){cfm("Delete this "+(kind==="apps"?"app":"tutorial")+"?","Delete",async()=>{await call("admin",{op:"del",kind,id});await load();tab="admin";draw()})}
+// maintenance form (5 fields)
+function mtOpen(){const m=S.maint||{},on=mOn(),v=m.end?new Date(m.end*1000-new Date(m.end*1000).getTimezoneOffset()*60000).toISOString().slice(0,16):"";
+ modal(`${xb}<h2>Maintenance</h2><p>Visitors will only see this screen.</p><input id="mt_t" placeholder="Title (default: We’ll be right back)" value="${esc(m.title||"")}" style="margin-bottom:8px"><textarea id="mt_m" rows="3" placeholder="Message" style="margin-bottom:8px">${esc(m.msg||"")}</textarea>
+ <small class="lab">Ends at, in your time zone (optional)</small><input id="mt_e" type="datetime-local" value="${v}" style="margin:6px 0 12px">
+ <label class="ck"><input type="checkbox" id="mt_c" ${m.cd!==false?"checked":""}> Show countdown</label><label class="ck"><input type="checkbox" id="mt_b" ${m.btn?"checked":""}> Show “Join our Telegram” button</label>
+ ${on?`<button class="btn p" onclick="mtSave(true)">Save changes</button><button class="btn" onclick="mtOff()">Turn off</button>`:`<button class="btn dn" onclick="mtAsk()">Start maintenance</button>`}`)}
+function mtVals(){const v=$("#mt_e").value;return{title:$("#mt_t").value.trim(),msg:$("#mt_m").value.trim(),end:v?Math.floor(new Date(v).getTime()/1000):0,cd:$("#mt_c").checked,btn:$("#mt_b").checked}}
+function mtAsk(){const d=mtVals();if(d.end&&d.end<=Date.now()/1000)return alert("The end time must be in the future.");cfm("Start maintenance? Visitors will only see the maintenance screen.","Start",()=>mtSave(true,d))}
+async function mtSave(on,d){d=d||mtVals();if(on&&d.end&&d.end<=Date.now()/1000)return alert("The end time must be in the future.");await call("admin",{op:"maint",data:{...d,on}});$("#m").innerHTML="";await load();tab="admin";draw()}
+async function mtOff(){await call("admin",{op:"maint",data:{...(S.maint||{}),on:false}});$("#m").innerHTML="";await load();tab="admin";draw()}
+// app and tutorial forms
+const AF=[["name","App name"],["version","Version"],["log","What’s new (changelog)","t"],["publisher","Publisher"],["req","Requirements"],["cat","Category"],["size","Size"],["price","Price"],["safety","Safety label"],["desc","Description","t"],["url","Android link (MediaFire)"],["ios","iOS link (MediaFire)"]],TF=[["title","Title"],["text","Text","t"],["video","Telegram video link"]];
+const PRE={name:["eFootxi","Kipas FOOTBALL","eFootball73"],publisher:["Sito (Owner)"],price:["Free"],safety:["100% Safe and Tested"]},MAND=["name"];
 const mand=k=>F.kind==="apps"&&MAND.includes(k);
-function shrink(f,max,q,sq){return new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement("canvas"),x=c.getContext("2d");if(sq){c.width=c.height=sq;const m=Math.min(i.width,i.height);x.drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,sq,sq)}else{const k=Math.min(1,max/Math.max(i.width,i.height));c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);x.drawImage(i,0,0,c.width,c.height)}r(c.toDataURL("image/webp",q))};i.src=URL.createObjectURL(f)})}
+function shrink(f,max,q,sq,mime){return new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement("canvas"),x=c.getContext("2d");if(sq){c.width=c.height=sq;const m=Math.min(i.width,i.height);x.drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,sq,sq)}else{const k=Math.min(1,max/Math.max(i.width,i.height));c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);x.drawImage(i,0,0,c.width,c.height)}r(c.toDataURL(mime||"image/webp",q))};i.src=URL.createObjectURL(f)})}
+const thumb=u=>new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement("canvas");c.width=c.height=192;const m=Math.min(i.width,i.height);c.getContext("2d").drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,192,192);r(c.toDataURL("image/webp",.8))};i.onerror=()=>r("");i.src=u});
 async function openForm(kind,id){let d={};
  if(id){d={...S[kind].find(x=>x.id===id)};if(kind==="apps"){const r=await call("app",{id});if(r.error)return alert("Couldn’t load the images. Try again.");d.img=r.img||"";d.shots=r.shots||[]}}
  else if(kind==="apps")d={publisher:"Sito (Owner)",shots:[]};
@@ -132,19 +222,20 @@ async function openForm(kind,id){let d={};
 function collect(){(F.kind==="apps"?AF:TF).forEach(([k])=>{const e=$("#f_"+k);if(e)F.d[k]=e.value})}
 const imgs=()=>`<div class="row"><small>Main image (always the first preview)</small>${F.d.img?`<div class="th"><img src="${F.d.img}" alt=""><b onclick="collect();F.d.img='';F.d.icon='';rf()">✕</b></div>`:""}<input type="file" accept="image/*" onchange="pm(this)"></div>
 <div class="row"><small>Preview images (up to 6)</small><div class="ths">${(F.d.shots||[]).map((s,i)=>`<div class="th"><img src="${s}" alt=""><b onclick="collect();F.d.shots.splice(${i},1);rf()">✕</b></div>`).join("")}</div><input type="file" accept="image/*" multiple onchange="ps(this)"></div>`;
+const tagsUi=()=>`<div class="row"><small>Tags</small><div class="chips" style="margin:6px 0 0">${TAGS.map(t=>`<span class="chip ${(F.d.tags||[]).includes(t)?"on":""}" onclick="tgl('${t}')">${t}</span>`).join("")}</div></div>`;
 function rf(){const fs=F.kind==="apps"?AF:TF,sh=$(".sheet"),st=sh?sh.scrollTop:0,d=F.d;
  const row=([k,l,t])=>F.hide[k]?"":`<div class="fr">${t?`<textarea id="f_${k}" rows="3" placeholder="${l}">${esc(d[k])}</textarea>`:`<input id="f_${k}" placeholder="${l}" value="${esc(d[k])}">`}${mand(k)?"":`<b role="button" aria-label="Remove ${l}" onclick="rm('${k}')">✕</b>`}</div>${F.kind==="apps"&&PRE[k]?`<div class="chips">${PRE[k].map(v=>`<span class="chip" onclick="fill('${k}',this.textContent)">${esc(v)}</span>`).join("")}</div>`:""}`;
  const gone=fs.filter(([k])=>F.hide[k]);
- modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${F.id?"Edit":"Add"}</h2><p>Tap ✕ to remove a field. Removed fields don’t show on the site.</p>${F.kind==="apps"?imgs():""}${fs.map(row).join("")}${gone.length?`<small style="color:var(--dim)">Removed fields, tap to add back</small><div class="chips">${gone.map(([k,l])=>`<span class="chip" onclick="ad('${k}')">+ ${l}</span>`).join("")}</div>`:""}<button class="btn p" style="margin-top:12px" onclick="save()">Save</button>`);
+ modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${F.id?"Edit":"Add"}</h2><p>Tap ✕ to remove a field. Removed fields don’t show on the site.</p>${F.kind==="apps"?imgs()+tagsUi():""}${fs.map(row).join("")}${gone.length?`<small style="color:var(--dim)">Removed fields, tap to add back</small><div class="chips">${gone.map(([k,l])=>`<span class="chip" onclick="ad('${k}')">+ ${l}</span>`).join("")}</div>`:""}<button class="btn p" style="margin-top:12px" onclick="save()">Save</button>`);
  const n=$(".sheet");if(n)n.scrollTop=st}
 const fill=(k,v)=>{$("#f_"+k).value=v};
+function tgl(t){collect();const a=F.d.tags||[];F.d.tags=a.includes(t)?a.filter(x=>x!==t):[...a,t];rf()}
 function rm(k){collect();F.hide[k]=1;rf()}
 function ad(k){collect();delete F.hide[k];rf()}
 async function pm(e){const f=e.files[0];if(!f)return;collect();F.d.img=await shrink(f,800,.72);F.d.icon=await shrink(f,0,.8,192);rf()}
 async function ps(e){collect();F.d.shots=F.d.shots||[];for(const f of [...e.files]){if(F.d.shots.length>=6)break;F.d.shots.push(await shrink(f,800,.72))}rf()}
-const thumb=u=>new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement("canvas");c.width=c.height=192;const m=Math.min(i.width,i.height);c.getContext("2d").drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,192,192);r(c.toDataURL("image/webp",.8))};i.onerror=()=>r("");i.src=u});
 async function save(){collect();if(F.kind==="apps"&&F.d.img&&!F.d.icon)F.d.icon=await thumb(F.d.img);const fs=F.kind==="apps"?AF:TF,data={};fs.forEach(([k])=>{const v=F.hide[k]?"":String(F.d[k]||"").trim();if(v)data[k]=v});
- if(F.kind==="apps"){if(!data.name||!data.url)return alert("App name and MediaFire link are required.");if(F.d.img)data.img=F.d.img;if(F.d.icon)data.icon=F.d.icon;if(F.d.shots?.length)data.shots=F.d.shots}
+ if(F.kind==="apps"){if(!data.name||(!data.url&&!data.ios))return alert("App name and at least one download link are required.");if(F.d.img)data.img=F.d.img;if(F.d.icon)data.icon=F.d.icon;if(F.d.shots?.length)data.shots=F.d.shots;if(F.d.tags?.length)data.tags=F.d.tags}
  else if(!Object.keys(data).length)return alert("Fill in at least one field.");
  const r=await call("admin",{op:"save",kind:F.kind,id:F.id,data});if(r.ok){$("#m").innerHTML="";await load();tab="admin";draw()}else alert(r.error||"Could not save")}
 load();
