@@ -16,7 +16,7 @@
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.5 system-ui,sans-serif}
 body{padding:0 0 calc(76px + env(safe-area-inset-bottom));padding-top:env(safe-area-inset-top)}
 h1,h2,h3,.nav button,.cd b{font-family:"Chakra Petch",system-ui,sans-serif}
-main{max-width:560px;margin:0 auto;padding:22px 18px}
+main{max-width:560px;margin:0 auto;padding:22px 18px;position:relative}
 .hero{text-align:center;padding-top:10px}
 .logo{width:190px;height:190px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 0 0 6px #0b1d46,0 0 60px 14px rgba(61,139,255,.55)}
 h1{font-size:34px;margin:28px 0 6px}h2{font-size:26px;margin:6px 0 16px}
@@ -57,10 +57,16 @@ input,textarea{width:100%;background:#071230;border:1.5px solid var(--line);bord
 @keyframes rot{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.sp:before{animation-duration:3s}}
 .cd{display:flex;gap:10px;justify-content:center;margin:18px 0}.cd div{background:#0b1e48;border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:64px}.cd b{font-size:26px;display:block}.cd small{color:var(--dim);font-size:12px}
+.lgbox{position:absolute;top:14px;inset-inline-end:14px;display:flex;align-items:center;gap:4px;background:#0b1e48;border:1.5px solid var(--line);color:var(--txt);border-radius:12px;padding:6px 10px;font-size:20px;line-height:1;cursor:pointer;z-index:4}.lgbox small{font-size:11px;color:var(--dim)}
+.pop{position:fixed;inset:0;z-index:15}.pop>div{position:absolute;top:calc(58px + env(safe-area-inset-top));inset-inline-end:14px;width:240px;max-height:70vh;overflow:auto;background:var(--card);border:1px solid var(--blue);border-radius:16px;padding:8px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.pop button{display:flex;gap:10px;align-items:center;width:100%;background:none;border:0;color:var(--txt);padding:10px;border-radius:10px;font:500 15px system-ui;cursor:pointer;text-align:start}.pop button.on{background:#0b1e48;color:var(--ice)}.pop hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+.tag.out{background:#3a0f14;border-color:#c0392b;color:#ff9a9a}.tag.upd{background:#0f3a1f;border-color:#2ecc71;color:#8dffb8}
+.chip.out{border-color:#c0392b;color:#ff9a9a}.chip.upd{border-color:#2ecc71;color:#8dffb8}.chip.on.out{background:#c0392b;color:#fff;border-color:#c0392b}.chip.on.upd{background:#2ecc71;color:#032a14;border-color:#2ecc71}
+.stp{display:flex;gap:8px;align-items:center;margin-top:6px}.stp .btn{width:56px;flex:none}.stp input{text-align:center}
 </style></head>
 <body>
 <div id="bar"></div><main id="v"></main>
-<nav class="nav" id="nav"></nav><div id="m"></div><div id="m2"></div>
+<nav class="nav" id="nav"></nav><div id="m"></div><div id="m2"></div><div id="m3"></div>
 <script>
 const API="https://sito.olydccx.workers.dev", CH="https://t.me/efootxifriendly", MINI="https://t.me/SitoAgentBOT/Sito";
 if(!localStorage.getItem("vid"))localStorage.setItem("vid",Math.random().toString(36).slice(2,12)+Date.now().toString(36));
@@ -72,7 +78,7 @@ let LG=(()=>{const s=localStorage.getItem("lg");if(s&&TT[s])return s;const b=Str
 const tr=k=>(TT[LG]&&TT[LG][k])||TT.en[k]||k;
 const applyDir=()=>{document.documentElement.lang=LG;document.documentElement.dir=LG==="ar"?"rtl":"ltr"};applyDir();
 let S={apps:[],tuts:[],lock:true,member:false,admin:false,preview:false,maint:null},tab="home",as="owner",q="",F={},asked=false,boot=true,FT=[],SORT="new",LD=null,W=false,IM=[],IMi=0,HI=0,tx=0,AT,MT,CT,CF,RP={};
-const TH={},TAGS=["iOS","Android","Online","Offline"];
+const TH={},TAGS=["iOS","Android","Online","Offline","Outdated","Updated"],tcl=t=>t==="Outdated"?"out":t==="Updated"?"upd":"";
 const call=async(p,b={})=>{try{return await(await fetch(API+"/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg?.initData||"",key:localStorage.getItem("k")||"",session:localStorage.getItem("ss")||"",vid:localStorage.getItem("vid")||"",...b})})).json()}catch{return{error:"network"}}};
 const go=u=>/t\.me/.test(u)&&tg?tg.openTelegramLink(u):tg?tg.openLink(u):window.open(u,"_blank");
 const mem=()=>S.admin?as!=="visitor":S.member;
@@ -80,7 +86,7 @@ const mOn=()=>!!(S.maint&&S.maint.on&&(!S.maint.end||Date.now()/1000<S.maint.end
 const hay=(o,ks)=>ks.map(k=>o[k]||"").join(" ").toLowerCase();
 const bd=x=>{const n=Date.now()/1000;return n-x.t<604800?tr("b_new"):n-x.u<604800?tr("b_upd"):""};
 const bdh=x=>bd(x)?`<span class="bd">${bd(x)}</span>`:"";
-const tagsHtml=x=>x.tags?.length?`<div class="tags">${x.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:"";
+const tagsHtml=x=>x.tags?.length?`<div class="tags">${x.tags.map(t=>`<span class="tag ${tcl(t)}">${esc(t)}</span>`).join("")}</div>`:"";
 const L={version:"l_version",publisher:"l_publisher",req:"l_req",cat:"l_cat",size:"l_size",price:"l_price"};
 const dstr=t=>t?new Date(t*1000).toLocaleDateString(LG,{month:"short",day:"numeric",year:"numeric"}):"";
 function modal(h){$("#m").innerHTML=`<div class="modal" onclick="if(event.target===this)$('#m').innerHTML=''"><div class="sheet">${h}</div></div>`}
@@ -90,17 +96,18 @@ async function load(){const m=location.hash.match(/^#c=([0-9a-f]+)$/);
  if(m){history.replaceState(null,"",location.pathname);const x=await call("redeem",{code:m[1]});if(x.session)localStorage.setItem("ss",x.session);else alert("This link expired. Open the site in Telegram and make a new one.")}
  const r=await call("init");if(r.error){$("#v").innerHTML=`<p class="empty">${tr("err_srv")}</p>`;return}
  S={...S,...r};
+ if(!S.ident&&localStorage.getItem("ss"))localStorage.removeItem("ss");
+ if(tg?.initDataUnsafe?.start_param==="reg"&&!sessionStorage.getItem("reg")){sessionStorage.setItem("reg","1");autoReg()}
  if(boot){boot=false;if(S.admin&&/[?&]tab=admin/.test(location.search))tab="admin"}
  if(location.hash==="#admin"&&S.preview&&!S.admin&&!asked){asked=true;const k=prompt("Preview key");if(k){localStorage.setItem("k",k);return load()}}
  draw()}
 
-function draw(){clearInterval(MT);clearInterval(AT);
+function draw(np){clearInterval(MT);clearInterval(AT);
  if(mOn()&&(!S.admin||as!=="owner"))return maint();
  const tabs=[["home","nav_home"],["apps","nav_apps"],["tuts","nav_tuts"],["social","nav_social"],["more","nav_more"]].map(([k,n])=>[k,tr(n)]);if(S.admin&&as==="owner")tabs.push(["admin","Admin"]);
  $("#nav").innerHTML=tabs.map(([k,n])=>`<button class="${tab===k?"on":""}" onclick="tab='${k}';draw()">${n}</button>`).join("");
  $("#bar").innerHTML=S.admin&&as!=="owner"?`<div class="bar">Previewing as ${as==="member"?"Member":"Visitor"} · <u onclick="as='owner';draw()">Exit</u></div>`:S.admin&&mOn()?`<div class="bar red">Maintenance is ON · <u onclick="mtOpen()">Edit</u> · <u onclick="mtOff()">Turn off</u></div>`:"";
- if(!tg?.initData&&!S.member&&S.lock&&!S.admin){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>${tr("gate_t")}</p><a class="btn p" href="${MINI}">${tr("gate_b")}</a></div>`;$("#nav").innerHTML="";if(!sessionStorage.getItem("rd")){sessionStorage.setItem("rd","1");setTimeout(()=>{location.href=MINI},1200)}return}
- ({home,apps,tuts,social,more,admin})[tab]();window.scrollTo(0,0)}
+ ({home,apps,tuts,social,more,admin})[tab]();window.scrollTo(0,0);if(!np&&needReg())regPop()}
 
 // ---------- maintenance screen ----------
 function maint(){const m=S.maint||{},end=m.end||0;$("#nav").innerHTML="";
@@ -112,7 +119,7 @@ function maint(){const m=S.maint||{},end=m.end||0;$("#nav").innerHTML="";
  else if(end)MT=setTimeout(load,Math.min(3e8,Math.max(1000,end*1000-Date.now()+1500)))}
 
 // ---------- home ----------
-function home(){$("#v").innerHTML=`<div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>${tr("welcome")}</p><button class="btn p" onclick="go(CH)">${tr("join_tg")}</button><br><input placeholder="${tr("search_all")}" aria-label="${tr("search_all")}" oninput="gs(this.value)" style="margin-top:14px"></div><div id="sug" style="margin-top:14px"></div><div id="rec">${rec()}</div>`;fh()}
+function home(){$("#v").innerHTML=`<button class="lgbox" onclick="lgOpen()" aria-label="${tr("language")}">${(LANGS.find(l=>l[0]===LG)||LANGS[0])[1]}<small>▾</small></button><div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>${tr("welcome")}</p><button class="btn p" onclick="go(CH)">${tr("join_tg")}</button><br><input placeholder="${tr("search_all")}" aria-label="${tr("search_all")}" oninput="gs(this.value)" style="margin-top:14px"></div><div id="sug" style="margin-top:14px"></div><div id="rec">${rec()}</div>`;fh()}
 const getImg=async id=>{if(!(id in TH)){const r=await call("app",{id});TH[id]=r.img||""}return TH[id]};
 const ico=x=>x.icon?`<img src="${x.icon}" alt="">`:`<div class="ic" data-ic="${x.id}"></div>`;
 async function fi(){for(const e of document.querySelectorAll("[data-ic]")){const s=await getImg(+e.dataset.ic);if(s)e.outerHTML=`<img src="${s}" alt="">`}}
@@ -127,7 +134,7 @@ function gs(v){v=v.trim().toLowerCase();const el=$("#sug"),rc=$("#rec");rc.style
 function apps(){const SO=[["new","s_new"],["old","s_old"],["liked","s_liked"],["viewed","s_viewed"]];
  $("#v").innerHTML=`<h2>${tr("nav_apps")}</h2><input value="${esc(q)}" placeholder="${tr("search_apps")}" aria-label="${tr("search_apps")}" oninput="q=this.value;rl()" style="margin-bottom:10px">
  <small class="lab">${tr("sort")}</small><div class="chips" style="margin:2px 0 10px">${SO.map(([k,l])=>`<span class="chip ${SORT===k?"on":""}" onclick="srt('${k}')">${tr(l)}</span>`).join("")}</div>
- <small class="lab">${tr("filter")}</small><div class="chips" style="margin:2px 0 12px"><span class="chip ${FT.length?"":"on"}" onclick="ftg('')">${tr("all")}</span>${TAGS.map(t=>`<span class="chip ${FT.includes(t)?"on":""}" onclick="ftg('${t}')">${t}</span>`).join("")}</div><div id="list"></div>`;rl()}
+ <small class="lab">${tr("filter")}</small><div class="chips" style="margin:2px 0 12px"><span class="chip ${FT.length?"":"on"}" onclick="ftg('')">${tr("all")}</span>${TAGS.map(t=>`<span class="chip ${tcl(t)} ${FT.includes(t)?"on":""}" onclick="ftg('${t}')">${t}</span>`).join("")}</div><div id="list"></div>`;rl()}
 const srt=s=>{SORT=s;apps()},ftg=t=>{FT=t?(FT.includes(t)?FT.filter(x=>x!==t):[...FT,t]):[];apps()};
 function rl(){const n=q.toLowerCase(),d=x=>x.t||0;
  const a=S.apps.filter(x=>hay(x,["name","version","cat","publisher","tags"]).includes(n)&&FT.every(t=>(x.tags||[]).includes(t)));
@@ -141,10 +148,15 @@ function show(id){const x=S.apps.find(a=>a.id===id);if(!x)return;
  ${Object.keys(L).filter(k=>x[k]).map(k=>`<div class="row"><small>${tr(L[k])}</small><b>${esc(x[k])}</b></div>`).join("")}
  ${x.pa?`<button class="btn p" style="margin-top:12px" onclick="dl(${x.id},'a')">${tr("dl_android")}</button>`:""}${x.pi?`<button class="btn${x.pa?"":" p"}" style="margin-top:10px" onclick="dl(${x.id},'i')">${tr("dl_ios")}</button>`:""}${tg?.initData||localStorage.getItem("ss")?`<button class="btn" style="margin-top:10px" onclick="rpOpen(${x.id})">${tr("report")}</button>`:""}`);
  loadHero(x.id);call("view",{id:x.id})}
-async function likeIt(id){if(!tg?.initData&&!localStorage.getItem("ss"))return alert(tr("like_need"));const r=await call("like",{id});
+async function likeIt(id){if(needReg())return regPop();const r=await call("like",{id});
  if(r.ok){const x=S.apps.find(a=>a.id===id);x.lk=r.lk;x.me=true;const b=$("#lkb");if(b){b.classList.add("on");b.disabled=true;$("#lc").textContent=r.lk}}else alert(r.error||"")}
 async function dl(id,p){LD=[id,p];if(S.admin&&as==="visitor"&&S.lock)return lockSheet();
- const r=await call("dl",{id,p});if(r.url)go(r.url);else if(r.error==="not_member")lockSheet();else alert(r.error||tr("err_srv"))}
+ const r=await call("dl",{id,p});if(r.url)go(r.url);else if(r.error==="not_member")(needReg()?regPop:lockSheet)();else alert(r.error||tr("err_srv"))}
+const needReg=()=>!tg?.initData&&!S.ident&&!S.admin&&!S.preview&&!mOn();
+function regPop(){modal(`${xb}<h2>${tr("reg_t")}</h2><p>${tr("reg_p")}</p><button class="btn p" onclick="regGo()">${tr("reg_b")}</button>`)}
+const regGo=()=>{location.href=MINI+"?startapp=reg"};
+async function autoReg(){const r=await call("link");if(!r.code)return;window._u=location.origin+location.pathname+"#c="+r.code;try{tg.openLink(window._u)}catch{}
+ modal(`${xb}<h2>${tr("reg_t")}</h2><p>${tr("reg_ok")}</p><button class="btn p" onclick="tg.openLink(window._u)">${tr("br_open")}</button>`)}
 function lockSheet(){W=true;modal(`<h2>${tr("lock_t")}</h2><p>${tr("lock_p")}</p><button class="btn p" onclick="go(CH)">${tr("open_ch")}</button><button class="btn" onclick="resume(1)">${tr("joined")}</button>`)}
 async function resume(m){if(!W)return;await load();if(mem()){W=false;$("#m").innerHTML="";if(LD)dl(LD[0],LD[1])}else if(m)alert(tr("not_yet"))}
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)resume()});tg?.onEvent?.("activated",()=>resume());
@@ -177,22 +189,22 @@ function more(){const c=LANGS.find(l=>l[0]===LG);$("#v").innerHTML=`<h2>${tr("na
 function info(k){modal(`${xb}<h2>${tr(k)}</h2><p>${tr(k+"_t")}</p>`)}
 async function mk(){const r=await call("link");if(!r.code)return alert(r.error||"");window._u=location.origin+location.pathname+"#c="+r.code;
  modal(`${xb}<h2>${tr("br_title")}</h2><p>${tr("br_p")}</p><button class="btn p" onclick="tg.openLink(window._u)">${tr("br_open")}</button><button class="btn" onclick="navigator.clipboard?.writeText(window._u).then(()=>alert(tr('copied')))">${tr("copy_link")}</button>`)}
-function setL(c){LG=c;localStorage.setItem("lg",c);applyDir();$("#m").innerHTML="";draw()}
-function lgOpen(){modal(`${xb}<h2>${tr("language")}</h2>${LANGS.map(([c,f,n])=>`<button class="btn${LG===c?" p":""}" onclick="setL('${c}')">${f} ${n}</button>`).join("")}<button class="btn" style="margin-top:16px" onclick="sgOpen()">✍ ${tr("suggest")}</button>`)}
-function sgOpen(){modal(`${xb}<h2>${tr("suggest")}</h2><textarea id="sg_t" rows="3" maxlength="200" placeholder="${tr("sg_ph")}" style="margin-bottom:12px"></textarea><button class="btn p" onclick="sgSend()">${tr("send")}</button>`)}
+function setL(c){LG=c;localStorage.setItem("lg",c);applyDir();$("#m3").innerHTML="";$("#m").innerHTML="";draw(1)}
+function lgOpen(){$("#m3").innerHTML=`<div class="pop" onclick="if(event.target===this)$('#m3').innerHTML=''"><div>${LANGS.map(([c,f,n])=>`<button class="${LG===c?"on":""}" onclick="setL('${c}')"><span style="font-size:20px">${f}</span> ${n}</button>`).join("")}<hr><button onclick="sgOpen()">✍ ${tr("suggest")}</button></div></div>`}
+function sgOpen(){$("#m3").innerHTML="";modal(`${xb}<h2>${tr("suggest")}</h2><textarea id="sg_t" rows="3" maxlength="200" placeholder="${tr("sg_ph")}" style="margin-bottom:12px"></textarea><button class="btn p" onclick="sgSend()">${tr("send")}</button>`)}
 async function sgSend(){const text=$("#sg_t").value.trim();if(!text)return;const r=await call("suggest",{text});if(r.ok){$("#m").innerHTML="";alert(tr("sg_thanks"))}else alert(r.error||"")}
 
 // ---------- admin (English only) ----------
-const ptxt=(s,id)=>`${s.per?.find(p=>p.app===id)?.c||0} downloads · ♥ ${s.likes?.find(p=>p.app===id)?.c||0} · 👁 ${s.views?.find(p=>p.app===id)?.c||0}`;
+const ptxt=(s,x)=>`${s.per?.find(p=>p.app===x.id)?.c||0} downloads · ♥ ${s.likes?.find(p=>p.app===x.id)?.c||0}${x.fl?` (+${x.fl})`:""} · 👁 ${s.views?.find(p=>p.app===x.id)?.c||0}`;
 async function admin(){$("#v").innerHTML='<p class="empty">Loading…</p>';const s=await call("admin",{op:"stats"});if(s.error){$("#v").innerHTML=`<p class="empty">${esc(s.error)}</p>`;return}
- $("#v").innerHTML=`<h2>Admin</h2><div class="row"><small>Visitors (live)</small><b id="sv">${s.visits??0} total · ${s.today??0} today</b></div><div class="row"><small>Downloads</small><b id="sdl">${s.downloads??0}</b></div>
+ $("#v").innerHTML=`<h2>Admin</h2><div class="row"><small>Visitors (live)</small><b id="sv">${s.visits??0} total · ${s.today??0} today · 🟢 ${s.online??0} online</b></div><div class="row"><small>Downloads</small><b id="sdl">${s.downloads??0}</b></div>
  <div class="row"><small>Require channel join</small><button class="btn ${S.lock?"p":""}" onclick="lk()">${S.lock?"On (tap to turn off)":"Off (tap to turn on)"}</button></div>
  <button class="btn ${mOn()?"dn":""}" style="margin-bottom:14px" onclick="mtOpen()">Maintenance${mOn()?" (ON)":""}</button>
  <small style="color:var(--dim)">View as</small><div class="seg"><button class="btn" onclick="as='member';draw()">Member</button><button class="btn" onclick="as='visitor';draw()">Visitor</button></div>
- <h3>Apps</h3>${S.apps.map(x=>`<div class="row"><b>${esc(x.name)}</b> <small id="pa${x.id}">${ptxt(s,x.id)}</small><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('apps',${x.id})">Edit</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('apps')">Add app</button>
+ <h3>Apps</h3>${S.apps.map(x=>`<div class="row"><b>${esc(x.name)}</b> <small id="pa${x.id}">${ptxt(s,x)}</small><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('apps',${x.id})">Edit</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('apps')">Add app</button>
  <h3>Tutorials</h3>${S.tuts.map(x=>`<div class="row"><b>${esc(x.title||"Untitled")}</b><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('tuts',${x.id})">Edit</button><button class="btn" onclick="del('tuts',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('tuts')">Add tutorial</button>`;live()}
 function live(){clearInterval(AT);AT=setInterval(async()=>{if(tab!=="admin"||!$("#sv")){clearInterval(AT);return}const s=await call("admin",{op:"stats"});if(s.error||!$("#sv"))return;
- $("#sv").textContent=`${s.visits} total · ${s.today} today`;$("#sdl").textContent=s.downloads;S.apps.forEach(x=>{const e=$("#pa"+x.id);if(e)e.textContent=ptxt(s,x.id)})},8000)}
+ $("#sv").textContent=`${s.visits} total · ${s.today} today · 🟢 ${s.online} online`;$("#sdl").textContent=s.downloads;S.apps.forEach(x=>{const e=$("#pa"+x.id);if(e)e.textContent=ptxt(s,x)})},8000)}
 async function lk(){await call("admin",{op:"lock",v:!S.lock});S.lock=!S.lock;admin()}
 // confirmation with a 5-second lock (Cancel is instant)
 function cfm(msg,label,fn){let n=5;modal(`<h2>${esc(msg)}</h2><button class="btn" onclick="cx()">Cancel</button><button class="btn dn" id="cb" disabled>${esc(label)} (5)</button>`);
@@ -219,24 +231,27 @@ async function openForm(kind,id){let d={};
  if(id){d={...S[kind].find(x=>x.id===id)};if(kind==="apps"){const r=await call("app",{id});if(r.error)return alert("Couldn’t load the images. Try again.");d.img=r.img||"";d.shots=r.shots||[]}}
  else if(kind==="apps")d={publisher:"Sito (Owner)",shots:[]};
  F={kind,id,d,hide:{}};(kind==="apps"?AF:TF).forEach(([k])=>{if(id&&!d[k]&&!mand(k))F.hide[k]=1});rf()}
-function collect(){(F.kind==="apps"?AF:TF).forEach(([k])=>{const e=$("#f_"+k);if(e)F.d[k]=e.value})}
+function collect(){(F.kind==="apps"?AF:TF).forEach(([k])=>{const e=$("#f_"+k);if(e)F.d[k]=e.value});const l=$("#f_fl");if(l)F.d.fl=Math.max(0,parseInt(l.value)||0)}
 const imgs=()=>`<div class="row"><small>Main image (always the first preview)</small>${F.d.img?`<div class="th"><img src="${F.d.img}" alt=""><b onclick="collect();F.d.img='';F.d.icon='';rf()">✕</b></div>`:""}<input type="file" accept="image/*" onchange="pm(this)"></div>
 <div class="row"><small>Preview images (up to 6)</small><div class="ths">${(F.d.shots||[]).map((s,i)=>`<div class="th"><img src="${s}" alt=""><b onclick="collect();F.d.shots.splice(${i},1);rf()">✕</b></div>`).join("")}</div><input type="file" accept="image/*" multiple onchange="ps(this)"></div>`;
-const tagsUi=()=>`<div class="row"><small>Tags</small><div class="chips" style="margin:6px 0 0">${TAGS.map(t=>`<span class="chip ${(F.d.tags||[]).includes(t)?"on":""}" onclick="tgl('${t}')">${t}</span>`).join("")}</div></div>`;
+const tagsUi=()=>`<div class="row"><small>Tags</small><div class="chips" style="margin:6px 0 0">${TAGS.map(t=>`<span class="chip ${tcl(t)} ${(F.d.tags||[]).includes(t)?"on":""}" onclick="tgl('${t}')">${t}</span>`).join("")}</div></div>`;
 function rf(){const fs=F.kind==="apps"?AF:TF,sh=$(".sheet"),st=sh?sh.scrollTop:0,d=F.d;
  const row=([k,l,t])=>F.hide[k]?"":`<div class="fr">${t?`<textarea id="f_${k}" rows="3" placeholder="${l}">${esc(d[k])}</textarea>`:`<input id="f_${k}" placeholder="${l}" value="${esc(d[k])}">`}${mand(k)?"":`<b role="button" aria-label="Remove ${l}" onclick="rm('${k}')">✕</b>`}</div>${F.kind==="apps"&&PRE[k]?`<div class="chips">${PRE[k].map(v=>`<span class="chip" onclick="fill('${k}',this.textContent)">${esc(v)}</span>`).join("")}</div>`:""}`;
  const gone=fs.filter(([k])=>F.hide[k]);
- modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${F.id?"Edit":"Add"}</h2><p>Tap ✕ to remove a field. Removed fields don’t show on the site.</p>${F.kind==="apps"?imgs()+tagsUi():""}${fs.map(row).join("")}${gone.length?`<small style="color:var(--dim)">Removed fields, tap to add back</small><div class="chips">${gone.map(([k,l])=>`<span class="chip" onclick="ad('${k}')">+ ${l}</span>`).join("")}</div>`:""}<button class="btn p" style="margin-top:12px" onclick="save()">Save</button>`);
+ modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${F.id?"Edit":"Add"}</h2><p>Tap ✕ to remove a field. Removed fields don’t show on the site.</p>${F.kind==="apps"?imgs()+tagsUi()+likesUi():""}${fs.map(row).join("")}${gone.length?`<small style="color:var(--dim)">Removed fields, tap to add back</small><div class="chips">${gone.map(([k,l])=>`<span class="chip" onclick="ad('${k}')">+ ${l}</span>`).join("")}</div>`:""}<button class="btn p" style="margin-top:12px" onclick="save()">Save</button>`);
  const n=$(".sheet");if(n)n.scrollTop=st}
 const fill=(k,v)=>{$("#f_"+k).value=v};
-function tgl(t){collect();const a=F.d.tags||[];F.d.tags=a.includes(t)?a.filter(x=>x!==t):[...a,t];rf()}
+const likesUi=()=>`<div class="row"><small>Likes: ${F.d.lr||0} real (kept forever) + added by you</small><div class="stp"><button class="btn" aria-label="Minus" onclick="flk(-1)">−</button><input id="f_fl" type="number" min="0" inputmode="numeric" value="${F.d.fl||0}"><button class="btn" aria-label="Plus" onclick="flk(1)">+</button></div></div>`;
+function flk(n){const e=$("#f_fl");e.value=Math.max(0,(parseInt(e.value)||0)+n)}
+function tgl(t){collect();const a=(F.d.tags||[]).filter(x=>!(t==="Outdated"&&x==="Updated")&&!(t==="Updated"&&x==="Outdated"));F.d.tags=a.includes(t)?a.filter(x=>x!==t):[...a,t];rf()}
 function rm(k){collect();F.hide[k]=1;rf()}
 function ad(k){collect();delete F.hide[k];rf()}
 async function pm(e){const f=e.files[0];if(!f)return;collect();F.d.img=await shrink(f,800,.72);F.d.icon=await shrink(f,0,.8,192);rf()}
 async function ps(e){collect();F.d.shots=F.d.shots||[];for(const f of [...e.files]){if(F.d.shots.length>=6)break;F.d.shots.push(await shrink(f,800,.72))}rf()}
 async function save(){collect();if(F.kind==="apps"&&F.d.img&&!F.d.icon)F.d.icon=await thumb(F.d.img);const fs=F.kind==="apps"?AF:TF,data={};fs.forEach(([k])=>{const v=F.hide[k]?"":String(F.d[k]||"").trim();if(v)data[k]=v});
- if(F.kind==="apps"){if(!data.name||(!data.url&&!data.ios))return alert("App name and at least one download link are required.");if(F.d.img)data.img=F.d.img;if(F.d.icon)data.icon=F.d.icon;if(F.d.shots?.length)data.shots=F.d.shots;if(F.d.tags?.length)data.tags=F.d.tags}
+ if(F.kind==="apps"){if(!data.name||(!data.url&&!data.ios))return alert("App name and at least one download link are required.");if(F.d.img)data.img=F.d.img;if(F.d.icon)data.icon=F.d.icon;if(F.d.shots?.length)data.shots=F.d.shots;if(F.d.tags?.length)data.tags=F.d.tags;if(F.d.fl>0)data.fl=F.d.fl}
  else if(!Object.keys(data).length)return alert("Fill in at least one field.");
  const r=await call("admin",{op:"save",kind:F.kind,id:F.id,data});if(r.ok){$("#m").innerHTML="";await load();tab="admin";draw()}else alert(r.error||"Could not save")}
 load();
+const ping=()=>{if(!document.hidden)call("ping")};setTimeout(ping,3000);setInterval(ping,15000);
 </script></body></html>
