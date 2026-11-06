@@ -71,6 +71,7 @@ input,textarea{width:100%;background:#071230;border:1.5px solid var(--line);bord
 .stp{display:flex;gap:8px;align-items:center;margin-top:6px}.stp .btn{width:56px;flex:none}.stp input{text-align:center}
 .bars{display:flex;align-items:flex-end;gap:3px;height:110px;margin:8px 0 4px}.bc{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}.bc i{display:block;width:100%;background:var(--blue);border-radius:3px 3px 0 0;min-height:2px}.bc small{font-size:9px;color:var(--dim);height:12px}
 .pb{height:6px;background:#10265a;border-radius:3px;margin-top:6px}.pb i{display:block;height:100%;background:var(--blue);border-radius:3px}
+select{width:100%;background:#071230;border:1.5px solid var(--line);border-radius:14px;color:var(--txt);padding:12px 14px;font:16px system-ui}
 </style></head>
 <body>
 <div id="bar"></div><main id="v"></main>
@@ -85,14 +86,14 @@ const LANGS=[["en","🇬🇧","English"],["es","🇪🇸","Español"],["ar","�
 let LG=(()=>{const s=localStorage.getItem("lg");if(s&&TT[s])return s;const b=String(tg?.initDataUnsafe?.user?.language_code||navigator.language||"en").toLowerCase().split("-")[0];return TT[b]?b:"en"})();
 const tr=k=>(TT[LG]&&TT[LG][k])||TT.en[k]||k;
 const applyDir=()=>{document.documentElement.lang=LG;document.documentElement.dir=LG==="ar"?"rtl":"ltr"};applyDir();
-let S={apps:[],tuts:[],lock:true,member:false,admin:false,preview:false,ident:false,maint:null,tb:{}},tab="home",as="owner",q="",F={},asked=false,boot=true,FT=[],SORT="new",LD=null,W=false,IM=[],IMi=0,HI=0,tx=0,AT,MT,CT,CS,RP={},AP="",RS=null,DP=null,CTT="bug",NS={};
+let S={apps:[],tuts:[],lock:true,member:false,admin:false,preview:false,ident:false,maint:null,tb:{},trend:[],poll:null,up:null,rqn:0},tab="home",as="owner",q="",F={},asked=false,boot=true,FT=[],SORT="new",LD=null,W=false,IM=[],IMi=0,HI=0,tx=0,AT,MT,CT,CS,RP={},AP="",RS=null,DP=null,CTT="bug",NS={},MP="",RQ=[],RQF="open",RQS="votes",UT,RP2={plat:"a"},POLLON=false;
 try{NS=JSON.parse(localStorage.getItem("ns")||"{}")}catch{NS={}}
 const nsSave=()=>localStorage.setItem("ns",JSON.stringify(NS));
 const TH={},TAGS=["iOS","Android","Online","Offline","Outdated","Updated"],tcl=t=>t==="Outdated"?"out":t==="Updated"?"upd":"";
-const call=async(p,b={})=>{try{return await(await fetch(API+"/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg?.initData||"",key:localStorage.getItem("k")||"",session:localStorage.getItem("ss")||"",vid:localStorage.getItem("vid")||"",lg:LG,...b})})).json()}catch{return{error:"network"}}};
+const call=async(p,b={})=>{try{const j=await(await fetch(API+"/"+p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initData:tg?.initData||"",key:localStorage.getItem("k")||"",session:localStorage.getItem("ss")||"",vid:localStorage.getItem("vid")||"",lg:LG,rt:localStorage.getItem("seen")?1:0,...b})})).json();if(j&&j.error==="banned")j.error=tr("banned");return j}catch{return{error:"network"}}};
 const go=u=>/t\.me/.test(u)&&tg?tg.openTelegramLink(u):tg?tg.openLink(u):window.open(u,"_blank");
 const mem=()=>S.admin?as!=="visitor":S.member;
-const mOn=()=>!!(S.maint&&S.maint.on&&(!S.maint.end||Date.now()/1000<S.maint.end));
+const mOn=()=>!!(S.maint&&S.maint.on&&(!S.maint.start||Date.now()/1000>=S.maint.start)&&(!S.maint.end||Date.now()/1000<S.maint.end));
 const hay=(o,ks)=>ks.map(k=>o[k]||"").join(" ").toLowerCase();
 const bd=x=>{if(x.nb==="off")return"";const n=Date.now()/1000,a=x.nt||x.t;return n-a<604800?tr("b_new"):n-x.u<604800?tr("b_upd"):""};
 const bdh=x=>bd(x)?`<span class="bd">${bd(x)}</span>`:"";
@@ -113,7 +114,7 @@ const markSeen=k=>{const c=(S.tb||{})[k]||{};NS[k+"v"]=c.v||0;if(k==="apps"||k==
 async function load(){const m=location.hash.match(/^#c=([0-9a-f]+)$/);
  if(m){history.replaceState(null,"",location.pathname);const x=await call("redeem",{code:m[1]});if(x.session)localStorage.setItem("ss",x.session);else alert("This link expired. Open the site in Telegram and make a new one.")}
  const r=await call("init");if(r.error){$("#v").innerHTML=`<p class="empty">${tr("err_srv")}</p>`;return}
- S={...S,...r};
+ S={...S,...r};localStorage.setItem("seen","1");clearTimeout(UT);if(S.up&&S.up.start)UT=setTimeout(load,Math.min(3e8,Math.max(1000,S.up.start*1000-Date.now()+1500)));
  if(!S.ident&&localStorage.getItem("ss"))localStorage.removeItem("ss");
  if(tg?.initDataUnsafe?.start_param==="reg"&&!sessionStorage.getItem("reg")){sessionStorage.setItem("reg","1");autoReg()}
  if(!localStorage.getItem("ns")&&!mOn()){NS={appst:latest("apps"),tutst:latest("tuts")};nsSave()}
@@ -125,7 +126,7 @@ function draw(np){clearInterval(MT);clearInterval(AT);
  if(mOn()&&(!S.admin||as!=="owner"))return maint();
  if(tab!=="admin")markSeen(tab);
  const tabs=[["home","nav_home"],["apps","nav_apps"],["tuts","nav_tuts"],["social","nav_social"],["more","nav_more"]];
- $("#nav").innerHTML=tabs.map(([k,n])=>`<button class="${tab===k?"on":""}" onclick="tab='${k}';draw()">${tr(n)}${isNew(k)?`<i class="nw">${tr("b_new")}!</i>`:""}</button>`).join("")+(S.admin&&as==="owner"?`<button class="${tab==="admin"?"on":""}" onclick="AP='';tab='admin';draw()">Admin</button>`:"");
+ $("#nav").innerHTML=tabs.map(([k,n])=>`<button class="${tab===k?"on":""}" onclick="tab='${k}';${k==="more"?"MP='';":""}draw()">${tr(n)}${isNew(k)?`<i class="nw">${tr("b_new")}!</i>`:""}</button>`).join("")+(S.admin&&as==="owner"?`<button class="${tab==="admin"?"on":""}" onclick="AP='';tab='admin';draw()">Admin</button>`:"");
  $("#bar").innerHTML=S.admin&&as!=="owner"?`<div class="bar">Previewing as ${as==="member"?"Member":"Visitor"} · <u onclick="as='owner';draw()">Exit</u></div>`:S.admin&&mOn()?`<div class="bar red">Maintenance is ON · <u onclick="mtOpen()">Edit</u> · <u onclick="mtOff()">Turn off</u></div>`:"";
  ({home,apps,tuts,social,more,admin})[tab]();window.scrollTo(0,0);if(!np&&needReg())regPop()}
 
@@ -143,8 +144,14 @@ async function fi(){for(const e of document.querySelectorAll("[data-ic]")){const
 async function fh(){for(const e of document.querySelectorAll("[data-hi]")){const s=await getImg(+e.dataset.hi);if(s)e.innerHTML=`<img src="${s}" alt="">`}}
 const rcard=x=>{const t=x.desc||x.log||"",ex=t.length>110?t.slice(0,110).trimEnd()+"..":t;
  return `<div class="rc" onclick="show(${x.id})"><div class="rimg" data-hi="${x.id}"></div><div class="rb"><b>${esc(x.name)}</b>${x.ft?`<span class="bd gold">${tr("featured")}</span>`:bdx(x)}<small>${esc([x.version,x.size,dstr(x.t)].filter(Boolean).join(" · "))}${x.lk?` · ♥ ${x.lk}`:""}</small>${tagsHtml(x)}${ex?`<p>${esc(ex)}</p>`:""}</div></div>`};
+const upHtml=()=>S.up?`<div class="card" style="cursor:default;border-color:#c0392b"><div class="ic" style="display:grid;place-items:center;font-size:26px">🚧</div><div><b>${tr("upcoming")}</b><small>${tr("starts")}: ${esc(dtstr(S.up.start))}${S.up.end?" → "+esc(dtstr(S.up.end)):""}</small>${S.up.title?`<small>${esc(S.up.title)}</small>`:""}</div></div>`:"";
+const pollHtml=()=>{const p=S.poll;if(!p)return"";const t=p.total||0,pc=i=>t?Math.round(p.counts[i]/t*100):0;
+ return `<div id="pollbox"><h3>📊 ${tr("poll")}</h3><div class="row"><b>${esc(p.q)}</b>${p.opts.map((o,i)=>p.mine==null?`<button class="btn" style="margin-top:8px" onclick="pollVote(${i})">${esc(o)}</button>`:`<div style="margin-top:8px"><span>${esc(o)}${p.mine===i?" ✓":""}</span> <small style="display:inline">${p.counts[i]} · ${pc(i)}%</small><div class="pb"><i style="width:${pc(i)}%"></i></div></div>`).join("")}<small style="margin-top:8px">${t} ${tr("votes")}${p.end?` · ${esc(dtstr(p.end))}`:""}</small></div></div>`};
+async function pollVote(o){if(needReg())return regPop();const r=await call("pollvote",{id:S.poll.id,o});if(r.ok){S.poll=r.poll;$("#pollbox").outerHTML=pollHtml()}else alert(r.error||"")}
+const trendHtml=()=>{const m=Object.fromEntries(S.apps.filter(x=>!x.cs).map(x=>[x.id,x])),a=(S.trend||[]).filter(r=>m[r.app]).slice(0,5);
+ return a.length?`<h3>🔥 ${tr("trending")}</h3>`+a.map((r,i)=>{const x=m[r.app];return `<div class="card" onclick="show(${x.id})"><div style="font:700 20px 'Chakra Petch',sans-serif;color:var(--ice);width:26px">${i+1}</div>${ico(x)}<div><b>${esc(x.name)}${bdx(x)}</b><small>${esc([x.version,x.size].filter(Boolean).join(" · "))}</small></div></div>`}).join(""):""};
 const rec=()=>{const vis=S.apps.filter(x=>!x.cs).sort((a,b)=>(b.t||0)-(a.t||0)||b.id-a.id),ft=vis.find(x=>x.ft),rest=vis.filter(x=>!x.ft).slice(0,5),cs=S.apps.filter(x=>x.cs);
- return (ft?`<h3>${tr("featured")}</h3>${rcard(ft)}`:"")+(cs.length?`<h3>${tr("soon")}</h3>`+cs.map(x=>`<div class="card" onclick="show(${x.id})">${ico(x)}<div><b>${esc(x.name)}${bdx(x)}</b><small>${esc(dtstr(x.at))}</small></div></div>`).join(""):"")+(rest.length?`<h3>${tr("recent")}</h3>`+rest.map(rcard).join(""):"")};
+ return upHtml()+(ft?`<h3>${tr("featured")}</h3>${rcard(ft)}`:"")+pollHtml()+trendHtml()+(cs.length?`<h3>${tr("soon")}</h3>`+cs.map(x=>`<div class="card" onclick="show(${x.id})">${ico(x)}<div><b>${esc(x.name)}${bdx(x)}</b><small>${esc(dtstr(x.at))}</small></div></div>`).join(""):"")+(rest.length?`<h3>${tr("recent")}</h3>`+rest.map(rcard).join(""):"")};
 function home(){$("#v").innerHTML=`<button class="lgbox" onclick="lgOpen()" aria-label="${tr("language")}">${(LANGS.find(l=>l[0]===LG)||LANGS[0])[1]}<small>▾</small></button><div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>${tr("welcome")}</p><button class="btn p" onclick="go(CH)">${tr("join_tg")}</button><br><input placeholder="${tr("search_all")}" aria-label="${tr("search_all")}" oninput="gs(this.value)" style="margin-top:14px"></div><div id="sug" style="margin-top:14px"></div><div id="rec">${rec()}</div>`;fh();fi()}
 function gs(v){v=v.trim().toLowerCase();const el=$("#sug"),rc=$("#rec");rc.style.display=v?"none":"";if(!v){el.innerHTML="";return}
  const a=S.apps.filter(x=>hay(x,["name","version","cat","publisher","desc","log","tags"]).includes(v)).slice(0,6),t=S.tuts.filter(x=>hay(x,["title","text"]).includes(v)).slice(0,6);
@@ -211,7 +218,37 @@ const extra=()=>(tg?.initData?`<button class="btn p" style="margin-bottom:10px" 
 const so=()=>{localStorage.removeItem("ss");load()};
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();DP=e});
 function inst(){if(DP){DP.prompt();DP=null}else modal(`${xb}<h2>${tr("install")}</h2><p>${tr("install_h")}</p>`)}
-function more(){const c=LANGS.find(l=>l[0]===LG);$("#v").innerHTML=`<h2>${tr("nav_more")}</h2>${extra()}<button class="btn" onclick="lgOpen()">${c[1]} ${tr("language")} · ${c[2]}</button><button class="btn" onclick="ctOpen()">✉️ ${tr("contact")}</button><button class="btn" onclick="info('about')">${tr("about")}</button><button class="btn" onclick="info('privacy')">${tr("privacy")}</button>`}
+function more(){if(MP==="req")return pgRq();if(MP==="dl")return pgDl();const c=LANGS.find(l=>l[0]===LG);
+ $("#v").innerHTML=`<h2>${tr("nav_more")}</h2>${extra()}<button class="btn" onclick="MP='req';draw()">💡 ${tr("rq")}</button><button class="btn" onclick="myDl()">⬇️ ${tr("mydl")}</button><button class="btn" onclick="lgOpen()">${c[1]} ${tr("language")} · ${c[2]}</button><button class="btn" onclick="ctOpen()">✉️ ${tr("contact")}</button><button class="btn" onclick="info('about')">${tr("about")}</button><button class="btn" onclick="info('privacy')">${tr("privacy")}</button>`}
+const bkv=()=>`<button class="btn" style="margin-bottom:14px" onclick="MP='';draw()">← ${tr("back")}</button>`;
+function myDl(){if(needReg())return regPop();MP="dl";draw()}
+async function pgDl(){$("#v").innerHTML=`${bkv()}<h2>⬇️ ${tr("mydl")}</h2><p class="empty">…</p>`;const r=await call("mydl");if(MP!=="dl"||tab!=="more")return;const PL={a:"Android",i:"iOS",r:"📦"};
+ $("#v").innerHTML=`${bkv()}<h2>⬇️ ${tr("mydl")}</h2>`+((r.items||[]).map(e=>`<div class="row"><b>${esc(e.name)}</b> <small style="display:inline">${PL[e.p]||""} ${esc(e.v||"")} · ${esc(dtstr(e.ts))}</small><button class="btn" style="margin-top:8px" onclick="dl(${e.app},'${e.p}'${e.o>=0?","+e.o:""})">${tr("redl")}</button></div>`).join("")||`<p class="empty">${tr("mydl_e")}</p>`)}
+// ---- request board ----
+const PLT=p=>p==="a"?"Android":p==="i"?"iOS":tr("both"),RQT={open:"rq_open",plan:"rq_plan",done:"rq_done",no:"rq_no"};
+async function pgRq(){$("#v").innerHTML=`${bkv()}<h2>💡 ${tr("rq")}</h2><p class="empty">…</p>`;const r=await call("reqs");if(MP!=="req"||tab!=="more")return;RQ=r.items||[];rqDraw()}
+function rqDraw(){const a=RQ.filter(x=>x.st===RQF).sort(RQS==="votes"?(x,y)=>y.vt-x.vt||y.ts-x.ts:(x,y)=>y.ts-x.ts);
+ $("#v").innerHTML=`${bkv()}<h2>💡 ${tr("rq")}</h2><button class="btn p" onclick="rqForm()">＋ ${tr("rq_new")}</button><div class="chips" style="margin:12px 0 6px">${Object.keys(RQT).map(k=>`<span class="chip ${RQF===k?"on":""}" onclick="RQF='${k}';rqDraw()">${tr(RQT[k])}</span>`).join("")}</div><div class="chips" style="margin:0 0 12px">${[["votes","s_votes"],["new","s_new"]].map(([k,l])=>`<span class="chip ${RQS===k?"on":""}" onclick="RQS='${k}';rqDraw()">${tr(l)}</span>`).join("")}</div>`
+ +(a.map(x=>`<div class="card" onclick="rqShow(${x.id})"><div style="text-align:center;min-width:46px;font:700 18px 'Chakra Petch',sans-serif;color:var(--ice)">▲ ${x.vt}</div><div><b>${esc(x.name)}</b><small>${esc(x.ver)} · ${PLT(x.plat)}</small><small>${esc(x.why.length>110?x.why.slice(0,110)+"…":x.why)}</small></div></div>`).join("")||`<p class="empty">${tr("rq_empty")}</p>`)}
+function rqShow(id){const x=RQ.find(r=>r.id===id);if(!x)return;
+ modal(`${xb}<h2>${esc(x.name)}</h2><div class="tags"><span class="tag">${esc(x.ver)}</span><span class="tag">${PLT(x.plat)}</span><span class="tag ${x.st==="done"?"upd":x.st==="no"?"out":""}">${tr(RQT[x.st])}</span></div>
+ <div class="row"><small>${tr("rq_l1")}</small><b style="white-space:pre-wrap">${esc(x.why)}</b></div><div class="row"><small>${tr("rq_l2")}</small><b style="white-space:pre-wrap">${esc(x.det)}</b></div>
+ ${x.link?`<button class="btn" onclick="go('${esc(x.link)}')">🔗 ${esc(x.link.replace(/^https?:\/\//,"").slice(0,40))}</button>`:""}${x.note?`<div class="row" style="margin-top:8px"><small>${tr("rq_note")}</small><b style="white-space:pre-wrap">${esc(x.note)}</b></div>`:""}
+ ${x.st==="done"&&x.app&&S.apps.find(a=>a.id===x.app)?`<button class="btn p" style="margin-top:8px" onclick="$('#m').innerHTML='';show(${x.app})">${tr("k_app")} →</button>`:""}
+ ${x.st==="open"||x.st==="plan"?`<button class="lkb${x.mine?" on":""}" id="rqv" style="margin-top:12px" ${x.mine?"disabled":""} onclick="rqVote(${x.id})">▲ <span id="rqc">${x.vt}</span></button>`:""}`)}
+async function rqVote(id){if(needReg())return regPop();const r=await call("reqvote",{id});if(r.ok){const x=RQ.find(q=>q.id===id);x.vt=r.vt;x.mine=true;$("#rqc").textContent=r.vt;$("#rqv").disabled=true;$("#rqv").classList.add("on");if(MP==="req")rqDraw()}else alert(r.error||"")}
+function rqForm(){if(needReg())return regPop();RP2={plat:"a"};
+ modal(`${xb}<h2>${tr("rq_new")}</h2><input id="rq_n" placeholder="${tr("rq_name")}" oninput="rqSim()" style="margin-bottom:6px"><div id="rq_s"></div>
+ <small class="lab">${tr("rq_plat")}</small><div class="chips" id="rq_p">${[["a","Android"],["i","iOS"],["b",tr("both")]].map(([k,l],i)=>`<span class="chip ${i?"":"on"}" onclick="rqP('${k}',this)">${l}</span>`).join("")}</div>
+ <input id="rq_v" placeholder="${tr("rq_ver")}" style="margin-bottom:8px"><textarea id="rq_w" rows="4" maxlength="600" placeholder="${tr("rq_why")}" oninput="rqC('rq_w','rq_wc')"></textarea><small id="rq_wc" class="lab" style="margin-bottom:8px">0/60</small>
+ <textarea id="rq_d" rows="4" maxlength="800" placeholder="${tr("rq_det")}" oninput="rqC('rq_d','rq_dc')"></textarea><small id="rq_dc" class="lab" style="margin-bottom:8px">0/60</small>
+ <input id="rq_l" placeholder="${tr("rq_link")}" style="margin-bottom:12px"><button class="btn p" onclick="rqSend()">${tr("rq_send")}</button>`)}
+function rqP(k,e){RP2.plat=k;document.querySelectorAll("#rq_p .chip").forEach(c=>c.classList.remove("on"));e.classList.add("on")}
+function rqC(i,c){const n=$("#"+i).value.trim().length,e=$("#"+c);e.textContent=n+"/60";e.style.color=n>=60?"#7dffb0":""}
+function rqSim(){const v=$("#rq_n").value.trim().toLowerCase(),m=v.length>=3?S.apps.find(a=>{const n=(a.name||"").toLowerCase();return n.includes(v)||(n.length>2&&v.includes(n))}):null;$("#rq_s").innerHTML=m?`<small class="lab" style="color:#ffb86b;margin-bottom:6px">${tr("rq_sim")} ${esc(m.name)}</small>`:""}
+async function rqSend(){const g=i=>$("#"+i).value.trim(),b={name:g("rq_n"),ver:g("rq_v"),plat:RP2.plat,why:g("rq_w"),det:g("rq_d"),link:g("rq_l")};
+ if(b.name.length<3||b.ver.length<2||b.why.length<60||b.det.length<60)return alert(tr("rq_short"));
+ const r=await call("reqnew",b);if(r.ok){$("#m").innerHTML="";alert(tr("rq_thanks"));pgRq()}else alert(({short:tr("rq_short"),exists:tr("rq_exists"),limit:tr("rq_limit")})[r.error]||r.error||"")}
 function info(k){modal(`${xb}<h2>${tr(k)}</h2><p>${tr(k+"_t")}</p>`)}
 function ctOpen(){if(needReg())return regPop();CTT="bug";modal(`${xb}<h2>${tr("contact")}</h2><div class="chips" id="ctc">${[["bug","c_bug"],["req","c_req"],["q","c_q"]].map(([k,l],i)=>`<span class="chip ${i?"":"on"}" onclick="ctT('${k}',this)">${tr(l)}</span>`).join("")}</div><textarea id="ct_m" rows="4" maxlength="600" placeholder="${tr("c_ph")}" style="margin-bottom:12px"></textarea><button class="btn p" onclick="ctSend()">${tr("send")}</button>`)}
 function ctT(k,e){CTT=k;document.querySelectorAll("#ctc .chip").forEach(c=>c.classList.remove("on"));e.classList.add("on")}
@@ -224,61 +261,113 @@ function sgOpen(){$("#m3").innerHTML="";modal(`${xb}<h2>${tr("suggest")}</h2><te
 async function sgSend(){const text=$("#sg_t").value.trim();if(!text)return;const r=await call("suggest",{text});if(r.ok){$("#m").innerHTML="";alert(tr("sg_thanks"))}else alert(r.error||"")}
 
 // ---------- admin (English only): one tab, pages behind buttons ----------
-const go2=p=>{AP=p;admin()};
+let SEL=null,LST=null,BT={add:[],rem:[]},PF={q:"",opts:["","",""],end:0};
+const MENUS={"":[["stats","📊 Stats"],["content","📦 Content"],["comm","💬 Community"],["site","🌐 Site"],["view","👁 View as"]],stats:[["traffic","📈 Traffic"],["aud","👥 Audience"]],content:[["apps","📱 Apps"],["tuts","📚 Tutorials"],["trash","🗑 Recycle bin"]],comm:[["reqs","💡 Requests"],["poll","📊 Poll of the week"],["bans","🚫 Blocked accounts"]],site:[["badges","🏷 Tab badges"],["maint","🚧 Maintenance"],["tools","🛠 Tools"]]};
+const UPP={stats:"",content:"",comm:"",site:"",view:"",traffic:"stats",aud:"stats",apps:"content",tuts:"content",trash:"content",reqs:"comm",poll:"comm",bans:"comm",badges:"site",maint:"site",tools:"site"},TTL={stats:"Stats",content:"Content",comm:"Community",site:"Site"};
+const go2=p=>{AP=p;SEL=null;admin()};
 const bk=to=>`<button class="btn" style="margin-bottom:14px" onclick="go2('${to}')">← Back</button>`;
+const bdg=k=>(k==="comm"||k==="reqs")&&S.rqn?` (${S.rqn} open)`:"";
 const ago=t=>{const m=Math.max(0,Math.round((Date.now()/1000-t)/60));return m<60?m+" min ago":m<1440?Math.round(m/60)+" h ago":Math.round(m/1440)+" d ago"};
 const ptxt=(s,x)=>`${s.per?.find(p=>p.app===x.id)?.c||0} downloads · ♥ ${s.likes?.find(p=>p.app===x.id)?.c||0}${x.fl?` (+${x.fl})`:""} · 👁 ${s.views?.find(p=>p.app===x.id)?.c||0} · 👍 ${x.ok||0} 👎 ${x.bad||0}`;
 function admin(){clearInterval(AT);
- const P={stats:pgStats,content:pgContent,apps:pgApps,tuts:pgTuts,badges:pgBadges,tools:pgTools,view:pgView}[AP];if(P)return P();
- $("#v").innerHTML=`<h2>Admin</h2>${[["stats","📊 Stats"],["content","📦 Content"],["badges","🏷 Tab badges"],["tools","🛠 Site tools"],["view","👁 View as"]].map(([k,l])=>`<button class="btn" onclick="go2('${k}')">${l}</button>`).join("")}`}
+ const P={traffic:pgTraffic,aud:pgAud,apps:pgApps,tuts:pgTuts,trash:pgTrash,reqs:pgReqs,poll:pgPoll,bans:pgBans,badges:pgBadges,maint:pgMaint,tools:pgTools,view:pgView}[AP];if(P)return P();
+ $("#v").innerHTML=(AP?bk(UPP[AP]):"")+`<h2>${AP?TTL[AP]:"Admin"}</h2>`+(MENUS[AP]||MENUS[""]).map(([k,l])=>`<button class="btn" onclick="go2('${k}')">${l}${bdg(k)}</button>`).join("")}
 const sum=v=>v.reduce((a,b)=>a+b,0);
 const bars=(vals,labs)=>{const mx=Math.max(1,...vals);return `<div class="bars">${vals.map((v,i)=>`<div class="bc"><i style="height:${Math.round(v/mx*100)}%"></i><small>${labs[i]??""}</small></div>`).join("")}</div>`};
-async function pgStats(){$("#v").innerHTML=`${bk("")}<h2>Stats</h2><p class="empty">Loading…</p>`;
- const [s,a]=await Promise.all([call("admin",{op:"stats"}),call("admin",{op:"analytics"})]);if(AP!=="stats")return;if(s.error||a.error){$("#v").innerHTML=`${bk("")}<p class="empty">${esc(s.error||a.error)}</p>`;return}
+const flag=c=>/^[A-Z]{2}$/.test(c)?String.fromCodePoint(...[...c].map(ch=>127397+ch.charCodeAt(0))):"🌐";
+const cname=c=>{try{return new Intl.DisplayNames(["en"],{type:"region"}).of(c)||c}catch{return c}};
+const prow=(rows,name)=>{const t=sum(rows.map(r=>r.c))||1;return rows.sort((x,y)=>y.c-x.c).map(r=>{const p=Math.round(r.c/t*100);return `<div class="row"><b>${name(r.v)}</b> <small style="display:inline">${r.c} · ${p}%</small><div class="pb"><i style="width:${p}%"></i></div></div>`}).join("")||'<p class="empty">No data yet.</p>'};
+async function pgTraffic(){$("#v").innerHTML=`${bk("stats")}<h2>Traffic</h2><p class="empty">Loading…</p>`;
+ const [s,a]=await Promise.all([call("admin",{op:"stats"}),call("admin",{op:"analytics"})]);if(AP!=="traffic")return;if(s.error||a.error){$("#v").innerHTML=`${bk("stats")}<p class="empty">${esc(s.error||a.error)}</p>`;return}
  const days=[...Array(14)].map((_,i)=>new Date(Date.now()-(13-i)*864e5).toISOString().slice(0,10)),map=(arr,k)=>Object.fromEntries((arr||[]).map(r=>[r[k],r.c]));
  const vm=map(a.visits,"day"),dm=map(a.downloads,"day"),vv=days.map(d=>vm[d]||0),dd=days.map(d=>dm[d]||0),lab=days.map(d=>d.slice(8));
- const off=Math.round(new Date().getTimezoneOffset()/60),hm=map(a.hours,"h"),hh=[...Array(24)].map((_,i)=>hm[(i+off+24)%24]||0),hl=hh.map((_,i)=>i%3?"":i),tot=sum((a.langs||[]).map(l=>l.c))||1;
- $("#v").innerHTML=`${bk("")}<h2>Stats</h2><div class="row"><small>Visitors (live)</small><b id="sv">${s.visits} total · ${s.today} today · 🟢 ${s.online} online</b></div><div class="row"><small>Downloads</small><b id="sdl">${s.downloads}</b></div>
+ const off=Math.round(new Date().getTimezoneOffset()/60),hm=map(a.hours,"h"),hh=[...Array(24)].map((_,i)=>hm[(i+off+24)%24]||0),hl=hh.map((_,i)=>i%3?"":i);
+ $("#v").innerHTML=`${bk("stats")}<h2>Traffic</h2><div class="row"><small>Visitors (live)</small><b id="sv">${s.visits} total · ${s.today} today · 🟢 ${s.online} online</b></div><div class="row"><small>Downloads</small><b id="sdl">${s.downloads}</b></div>
  <h3>Visits, last 14 days</h3><small class="lab">Total ${sum(vv)} · best day ${Math.max(...vv)}</small>${bars(vv,lab)}
  <h3>Downloads, last 14 days</h3><small class="lab">Total ${sum(dd)} · best day ${Math.max(...dd)}</small>${bars(dd,lab)}
- <h3>Busiest hours (your time)</h3><small class="lab">Visits by hour, counted since this update</small>${bars(hh,hl)}
- <h3>Visitor languages</h3>${(a.langs||[]).map(l=>{const g=LANGS.find(x=>x[0]===l.l)||[l.l,"🌐",l.l],p=Math.round(l.c/tot*100);return `<div class="row"><b>${g[1]} ${g[2]}</b> <small style="display:inline">${l.c} · ${p}%</small><div class="pb"><i style="width:${p}%"></i></div></div>`}).join("")||'<p class="empty">No data yet.</p>'}`;live()}
-function pgContent(){$("#v").innerHTML=`${bk("")}<h2>Content</h2><button class="btn" onclick="go2('apps')">📱 Apps (${S.apps.length})</button><button class="btn" onclick="go2('tuts')">📚 Tutorials (${S.tuts.length})</button>`}
-async function pgApps(){$("#v").innerHTML=`${bk("content")}<h2>Apps</h2><p class="empty">Loading…</p>`;const s=await call("admin",{op:"stats"});if(AP!=="apps")return;
- $("#v").innerHTML=`${bk("content")}<h2>Apps</h2>${S.apps.map(x=>`<div class="row"><b>${esc(x.name)}</b>${x.st==="draft"?' <span class="bd">Draft</span>':x.cs?' <span class="bd gold">Scheduled</span>':""} <small id="pa${x.id}">${ptxt(s,x)}</small><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('apps',${x.id})">Edit</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('apps')">Add app</button>`;live()}
-function pgTuts(){$("#v").innerHTML=`${bk("content")}<h2>Tutorials</h2>${S.tuts.map(x=>`<div class="row"><b>${esc(x.title||"Untitled")}</b><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('tuts',${x.id})">Edit</button><button class="btn" onclick="del('tuts',${x.id})">Delete</button></div></div>`).join("")}<button class="btn p" onclick="openForm('tuts')">Add tutorial</button>`}
+ <h3>Busiest hours (your time)</h3><small class="lab">Visits by hour of day</small>${bars(hh,hl)}
+ <h3>Visitor languages</h3>${prow((a.langs||[]).map(l=>({v:l.l,c:l.c})),v=>{const g=LANGS.find(x=>x[0]===v)||[v,"🌐",v];return `${g[1]} ${g[2]}`})}`;live()}
+async function pgAud(){$("#v").innerHTML=`${bk("stats")}<h2>Audience</h2><p class="empty">Loading…</p>`;const a=await call("admin",{op:"analytics"});if(AP!=="aud")return;if(a.error){$("#v").innerHTML=`${bk("stats")}<p class="empty">${esc(a.error)}</p>`;return}
+ const g=k=>(a.aud||[]).filter(r=>r.k===k).map(r=>({v:r.v,c:r.c}));
+ $("#v").innerHTML=`${bk("stats")}<h2>Audience</h2><small class="lab">Last 14 days. Counted since this update.</small>
+ <h3>Countries</h3>${prow(g("ctry").sort((x,y)=>y.c-x.c).slice(0,10),v=>v==="??"?"🌐 Unknown":`${flag(v)} ${esc(cname(v))}`)}
+ <h3>Devices</h3>${prow(g("dev"),v=>({a:"🤖 Android",i:"🍎 iPhone / iPad",d:"💻 Desktop / other"})[v]||v)}
+ <h3>New and returning</h3>${prow(g("ret"),v=>v==="r"?"🔁 Returning visitors":"✨ New visitors")}
+ <h3>Downloads by type</h3>${prow(g("dlp"),v=>({a:"Android",i:"iOS",r:"📦 Resources"})[v]||v)}`}
+async function pgApps(c){if(!(c&&LST)){$("#v").innerHTML=`${bk("content")}<h2>Apps</h2><p class="empty">Loading…</p>`;LST=await call("admin",{op:"stats"});if(AP!=="apps")return}const s=LST;
+ $("#v").innerHTML=`${bk("content")}<h2>Apps</h2><div class="seg"><button class="btn p" onclick="openForm('apps')">＋ Add app</button><button class="btn" onclick="selMode()">${SEL?"✔ Done selecting":"☑ Select several"}</button></div>${SEL&&SEL.size?`<div class="row"><b>${SEL.size} selected</b><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="bulkSt()">Status</button><button class="btn" onclick="bulkTags()">Tags</button><button class="btn" onclick="bulkDel()">To bin</button></div></div>`:""}${S.apps.map(x=>`<div class="row">${SEL?`<label class="ck" style="margin:0"><input type="checkbox" ${SEL.has(x.id)?"checked":""} onchange="selT(${x.id},this.checked)"> <b>${esc(x.name)}</b></label>`:`<b>${esc(x.name)}</b>`}${x.st==="draft"?' <span class="bd">Draft</span>':x.cs?' <span class="bd gold">Scheduled</span>':""}${x.ft?' <span class="bd gold">Featured</span>':""} <small id="pa${x.id}">${ptxt(s,x)}</small>${SEL?"":`<div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('apps',${x.id})">Edit</button><button class="btn" onclick="dupIt('apps',${x.id})">Duplicate</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div>`}</div>`).join("")}`;live()}
+const selMode=()=>{SEL=SEL?null:new Set();pgApps(1)},selT=(id,on)=>{on?SEL.add(id):SEL.delete(id);pgApps(1)};
+function bulkSt(){modal(`${xb}<h2>Status for ${SEL.size} apps</h2><button class="btn p" onclick="bulkDo({st:'pub'})">Published</button><button class="btn" onclick="bulkDo({st:'draft'})">Draft (hidden)</button>`)}
+function bulkTags(){BT={add:[],rem:[]};modal(`${xb}<h2>Tags for ${SEL.size} apps</h2><small class="lab">Add these tags</small><div class="chips">${TAGS.map(t=>`<span class="chip ${tcl(t)}" onclick="btT('add','${t}',this)">${t}</span>`).join("")}</div><small class="lab">Remove these tags</small><div class="chips">${TAGS.map(t=>`<span class="chip ${tcl(t)}" onclick="btT('rem','${t}',this)">${t}</span>`).join("")}</div><button class="btn p" onclick="bulkDo({add:BT.add,rem:BT.rem})">Apply</button>`)}
+function btT(k,t,e){const a=BT[k],i=a.indexOf(t);i<0?a.push(t):a.splice(i,1);e.classList.toggle("on")}
+async function bulkDo(o){const r=await call("admin",{op:"bulk",ids:[...SEL],...o});$("#m").innerHTML="";if(r.ok){SEL=null;await load()}else alert(r.error||"")}
+function bulkDel(){cfm(`Move ${SEL.size} apps to the recycle bin?`,"Move",()=>bulkDo({del:true}))}
+async function dupIt(kind,id){const r=await call("admin",{op:"dup",kind,id});if(!r.ok)return alert(r.error||"");await load();openForm(kind,r.id)}
+function pgTuts(){$("#v").innerHTML=`${bk("content")}<h2>Tutorials</h2><button class="btn p" style="margin-bottom:10px" onclick="openForm('tuts')">＋ Add tutorial</button>${S.tuts.map(x=>`<div class="row"><b>${esc(x.title||"Untitled")}</b>${bdh(x)}<div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('tuts',${x.id})">Edit</button><button class="btn" onclick="dupIt('tuts',${x.id})">Duplicate</button><button class="btn" onclick="del('tuts',${x.id})">Delete</button></div></div>`).join("")}`}
+async function pgTrash(){$("#v").innerHTML=`${bk("content")}<h2>Recycle bin</h2><p class="empty">Loading…</p>`;const r=await call("admin",{op:"trash"});if(AP!=="trash")return;
+ $("#v").innerHTML=`${bk("content")}<h2>Recycle bin</h2><p>Deleted items stay here for 30 days. Likes and votes come back with a restored app.</p>`+((r.items||[]).map(x=>`<div class="row"><b>${x.kind==="apps"?"📱":"📚"} ${esc(x.name)}</b> <small style="display:inline">${esc(ago(x.ts))} · ${x.left} days left</small><div class="seg" style="margin:8px 0 0"><button class="btn p" onclick="untrash(${x.id})">Restore</button><button class="btn" onclick="trashDel(${x.id})">Delete forever</button></div></div>`).join("")||'<p class="empty">The bin is empty.</p>')}
+async function untrash(id){const r=await call("admin",{op:"untrash",id});if(r.error)return alert(r.error);await load()}
+function trashDel(id){cfm("Delete this forever?","Delete forever",async()=>{await call("admin",{op:"trashdel",id});admin()})}
+async function pgReqs(){$("#v").innerHTML=`${bk("comm")}<h2>Requests</h2><p class="empty">Loading…</p>`;const r=await call("reqs");if(AP!=="reqs")return;RQ=r.items||[];const o={open:0,plan:1,done:2,no:3};
+ $("#v").innerHTML=`${bk("comm")}<h2>Requests</h2>`+(RQ.sort((a,b)=>o[a.st]-o[b.st]||b.vt-a.vt).map(x=>`<div class="row"><b>${esc(x.name)}</b> <small style="display:inline">${esc(x.ver)} · ${PLT(x.plat)} · ▲ ${x.vt} · ${esc(dstr(x.ts))}</small><small style="white-space:pre-wrap;margin-top:6px"><b>Why:</b> ${esc(x.why)}</small><small style="white-space:pre-wrap;margin-top:4px"><b>Details:</b> ${esc(x.det)}</small>${x.link?`<small style="margin-top:4px">${esc(x.link)}</small>`:""}${x.note?`<small style="margin-top:4px"><b>Your note:</b> ${esc(x.note)}</small>`:""}<small>From ID <a style="color:var(--ice)" href="tg://user?id=${x.by}">${x.by}</a></small>
+ <div class="chips" style="margin:8px 0 6px">${[["open","Open"],["plan","Planned"],["done","Done"],["no","Declined"]].map(([k,l])=>`<span class="chip ${x.st===k?"on":""}" onclick="rqSt(${x.id},'${k}')">${l}</span>`).join("")}</div>
+ <div class="seg" style="margin:0"><button class="btn" onclick="rqEdit(${x.id})">Note / link app</button><button class="btn" onclick="banForm('${x.by}')">Block</button><button class="btn" onclick="rqDel(${x.id})">Delete</button></div></div>`).join("")||'<p class="empty">No requests yet.</p>')}
+async function rqSt(id,st){await call("admin",{op:"rqset",id,st});await load()}
+function rqEdit(id){const x=RQ.find(r=>r.id===id);modal(`${xb}<h2>${esc(x.name)}</h2><textarea id="rq_nt" rows="3" maxlength="300" placeholder="Note shown to everyone (optional)" style="margin-bottom:8px">${esc(x.note||"")}</textarea><small class="lab">Linked app (shown when Done)</small><select id="rq_ap" style="margin:6px 0 12px"><option value="0">None</option>${S.apps.map(a=>`<option value="${a.id}" ${x.app===a.id?"selected":""}>${esc(a.name)}</option>`).join("")}</select><button class="btn p" onclick="rqSave(${id})">Save</button>`)}
+async function rqSave(id){await call("admin",{op:"rqset",id,note:$("#rq_nt").value,app:+$("#rq_ap").value});$("#m").innerHTML="";await load()}
+function rqDel(id){cfm("Delete this request?","Delete",async()=>{await call("admin",{op:"rqdel",id});await load()})}
+async function pgPoll(){$("#v").innerHTML=`${bk("comm")}<h2>Poll of the week</h2><p class="empty">Loading…</p>`;const r=await call("admin",{op:"pollinfo"});if(AP!=="poll")return;const p=r.poll,act=!!(p&&p.on&&(!p.end||p.end>Date.now()/1000));POLLON=act;
+ const res=p?`<div class="row"><b>${esc(p.q)}</b> <small style="display:inline">${act?"🟢 Active":"⚪ Closed"}${p.end?" · ends "+esc(dtstr(p.end)):""}</small>${p.opts.map((o,i)=>{const pc=p.total?Math.round(p.counts[i]/p.total*100):0;return `<div style="margin-top:8px">${esc(o)} <small style="display:inline">${p.counts[i]} · ${pc}%</small><div class="pb"><i style="width:${pc}%"></i></div></div>`}).join("")}<small style="margin-top:8px">${p.total} votes</small>${act?`<button class="btn" style="margin-top:8px" onclick="pollClose()">Close poll</button>`:""}</div>`:"";
+ $("#v").innerHTML=`${bk("comm")}<h2>Poll of the week</h2>${res}<h3>New poll</h3><div id="pfb">${pfHtml()}</div>`}
+const pfHtml=()=>`<input id="pf_q" placeholder="Question" value="${esc(PF.q)}" style="margin-bottom:8px">${PF.opts.map((o,i)=>`<div class="fr"><input id="pf_o${i}" placeholder="Option ${i+1}" value="${esc(o)}">${PF.opts.length>2?`<b onclick="pfRm(${i})">✕</b>`:""}</div>`).join("")}${PF.opts.length<6?`<button class="btn" style="margin-bottom:10px" onclick="pfAdd()">＋ Add option</button>`:""}<small class="lab">Ends at, in your time zone (optional)</small><input id="pf_e" type="datetime-local" value="${PF.end?new Date(PF.end*1000-new Date(PF.end*1000).getTimezoneOffset()*60000).toISOString().slice(0,16):""}" style="margin:6px 0 12px"><button class="btn p" onclick="pfGo()">Publish poll</button>`;
+function pfCol(){PF.q=$("#pf_q").value;PF.opts=PF.opts.map((_,i)=>$("#pf_o"+i).value);const e=$("#pf_e").value;PF.end=e?Math.floor(new Date(e).getTime()/1000):0}
+const pfDraw=()=>{$("#pfb").innerHTML=pfHtml()};
+function pfAdd(){pfCol();PF.opts.push("");pfDraw()}
+function pfRm(i){pfCol();PF.opts.splice(i,1);pfDraw()}
+function pfGo(){pfCol();if(PF.end&&PF.end<=Date.now()/1000)return alert("The end time must be in the future.");
+ const pub=async()=>{const r=await call("admin",{op:"pollnew",q:PF.q,opts:PF.opts,end:PF.end});if(r.ok){PF={q:"",opts:["","",""],end:0};await load()}else alert(r.error||"")};
+ POLLON?cfm("Publish this poll? It replaces the current one.","Publish",pub):pub()}
+async function pollClose(){await call("admin",{op:"pollclose"});await load()}
+async function pgBans(){$("#v").innerHTML=`${bk("comm")}<h2>Blocked accounts</h2><p class="empty">Loading…</p>`;const r=await call("admin",{op:"banlist"});if(AP!=="bans")return;
+ $("#v").innerHTML=`${bk("comm")}<h2>Blocked accounts</h2><p>Blocked accounts can still look around, but can’t like, vote, report, contact, request, join polls or download.</p><button class="btn p" style="margin-bottom:10px" onclick="banForm('')">＋ Block an account</button>`+((r.items||[]).map(x=>`<div class="row"><b><a style="color:var(--ice)" href="tg://user?id=${esc(x.uid)}">${esc(x.uid)}</a></b> <small style="display:inline">${esc(ago(x.ts))}</small>${x.note?`<small>${esc(x.note)}</small>`:""}<button class="btn" style="margin-top:8px" onclick="unban('${esc(x.uid)}')">Unblock</button></div>`).join("")||'<p class="empty">Nobody is blocked.</p>')}
+function banForm(u){modal(`${xb}<h2>Block an account</h2><input id="bn_u" value="${esc(u||"")}" inputmode="numeric" placeholder="Telegram ID (numbers)" style="margin-bottom:8px"><input id="bn_n" placeholder="Reason (only you see it)" style="margin-bottom:12px"><button class="btn dn" onclick="banGo()">Block</button>`)}
+async function banGo(){const r=await call("admin",{op:"ban",uid:$("#bn_u").value,note:$("#bn_n").value});if(r.ok){$("#m").innerHTML="";if(AP==="bans")admin()}else alert(r.error||"")}
+async function unban(u){await call("admin",{op:"unban",uid:u});admin()}
 function pgBadges(){const T=[["home","nav_home"],["apps","nav_apps"],["tuts","nav_tuts"],["social","nav_social"],["more","nav_more"]];
- $("#v").innerHTML=`${bk("")}<h2>Tab badges</h2><p>A “New!” mark on a bottom tab. <b>On</b> shows it to everyone until they open that tab (tap On again to show it to everyone again). <b>Auto</b> (Apps and Tutorials) shows it when something new was posted since the visitor last opened the tab.</p>`+T.map(([k,n])=>{const c=(S.tb||{})[k]||{};const cur=c.m||"off";return `<div class="row"><b>${tr(n)}</b><div class="seg" style="margin:8px 0 0">${["off","on",...(k==="apps"||k==="tuts"?["auto"]:[])].map(m=>`<button class="btn ${cur===m?"p":""}" onclick="tbSet('${k}','${m}')">${m[0].toUpperCase()+m.slice(1)}</button>`).join("")}</div></div>`}).join("")}
+ $("#v").innerHTML=`${bk("site")}<h2>Tab badges</h2><p>A “New!” mark on a bottom tab. <b>On</b> shows it to everyone until they open that tab (tap On again to show it to everyone again). <b>Auto</b> (Apps and Tutorials) shows it when something new was posted since the visitor last opened the tab.</p>`+T.map(([k,n])=>{const cur=((S.tb||{})[k]||{}).m||"off";return `<div class="row"><b>${tr(n)}</b><div class="seg" style="margin:8px 0 0">${["off","on",...(k==="apps"||k==="tuts"?["auto"]:[])].map(m=>`<button class="btn ${cur===m?"p":""}" onclick="tbSet('${k}','${m}')">${m[0].toUpperCase()+m.slice(1)}</button>`).join("")}</div></div>`}).join("")}
 async function tbSet(k,m){const r=await call("admin",{op:"tabs",tab:k,m});if(r.tb){S.tb=r.tb;admin()}}
 function pgView(){$("#v").innerHTML=`${bk("")}<h2>View as</h2><p>See the site the way others do. A bar at the top lets you exit.</p><button class="btn" onclick="as='member';draw()">Member</button><button class="btn" onclick="as='visitor';draw()">Visitor</button>`}
-async function pgTools(){$("#v").innerHTML=`${bk("")}<h2>Site tools</h2><p class="empty">Loading…</p>`;const l=await call("admin",{op:"links"});if(AP!=="tools")return;
+async function pgTools(){$("#v").innerHTML=`${bk("site")}<h2>Tools</h2><p class="empty">Loading…</p>`;const l=await call("admin",{op:"links"});if(AP!=="tools")return;
  const rows=Object.values(l.ls||{}).sort((a,b)=>(a.n||"").localeCompare(b.n||"")).map(e=>`<div class="row"><b>${e.s==="ok"?"✅":e.s==="dead"?"❌":"❓"} ${esc(e.n)}</b> <small style="display:inline">${esc(e.f)} · ${ago(e.ts)}</small></div>`).join("");
- $("#v").innerHTML=`${bk("")}<h2>Site tools</h2><div class="row"><small>Require channel join</small><button class="btn ${S.lock?"p":""}" onclick="lk()">${S.lock?"On (tap to turn off)":"Off (tap to turn on)"}</button></div>
- <button class="btn ${mOn()?"dn":""}" style="margin-bottom:6px" onclick="mtOpen()">Maintenance${mOn()?" (ON)":""}</button>
+ $("#v").innerHTML=`${bk("site")}<h2>Tools</h2><div class="row"><small>Require channel join</small><button class="btn ${S.lock?"p":""}" onclick="lk()">${S.lock?"On (tap to turn off)":"Off (tap to turn on)"}</button></div>
  <h3>Backup</h3><button class="btn" onclick="bkNow()">Send backup to my Telegram</button><small class="lab" style="margin:12px 0 6px">Restore from a backup file</small><input type="file" accept=".json,application/json" onchange="rsPick(this)">
  <h3>Link health</h3><p>${Object.keys(l.ls||{}).length} of ${l.total||0} links checked. The bot checks 10 every 4 hours.</p>${rows}<button class="btn" style="margin-top:8px" onclick="chkNow()">Check next 10 now</button>`}
 async function bkNow(){const r=await call("admin",{op:"backup"});alert(r.ok?`Backup sent to your Telegram (${Math.round(r.bytes/1024)} KB).`:r.error||"Failed")}
 async function rsPick(e){const f=e.files[0];if(!f)return;let d;try{d=JSON.parse(await f.text())}catch{return alert("That is not a valid backup file.")}RS=d;
- cfm("Restore this backup? Items with the same ID are overwritten. Nothing is deleted.","Restore",async()=>{const r=await call("admin",{op:"restore",data:RS});alert(r.ok?`Restored ${r.items} items.`:r.error||"Failed");await load();tab="admin";draw()})}
+ cfm("Restore this backup? Items with the same ID are overwritten. Nothing is deleted.","Restore",async()=>{const r=await call("admin",{op:"restore",data:RS});alert(r.ok?`Restored ${r.items} items.`:r.error||"Failed");await load()})}
 async function chkNow(){await call("admin",{op:"check"});admin()}
 function live(){clearInterval(AT);AT=setInterval(async()=>{if(tab!=="admin"||(!$("#sv")&&!document.querySelector("[id^=pa]"))){clearInterval(AT);return}const s=await call("admin",{op:"stats"});if(s.error)return;
- const sv=$("#sv");if(sv){sv.textContent=`${s.visits} total · ${s.today} today · 🟢 ${s.online} online`;$("#sdl").textContent=s.downloads}S.apps.forEach(x=>{const e=$("#pa"+x.id);if(e)e.textContent=ptxt(s,x)})},8000)}
+ const sv=$("#sv");if(sv){sv.textContent=`${s.visits} total · ${s.today} today · 🟢 ${s.online} online`;$("#sdl").textContent=s.downloads}LST=s;S.apps.forEach(x=>{const e=$("#pa"+x.id);if(e)e.textContent=ptxt(s,x)})},8000)}
 async function lk(){await call("admin",{op:"lock",v:!S.lock});S.lock=!S.lock;admin()}
 // confirmation with a 5-second lock (Cancel is instant)
 function cfm(msg,label,fn){let n=5;modal(`<h2>${esc(msg)}</h2><button class="btn" onclick="cx()">Cancel</button><button class="btn dn" id="cb" disabled>${esc(label)} (5)</button>`);
  clearInterval(CT);CT=setInterval(()=>{n--;const b=$("#cb");if(!b){clearInterval(CT);return}if(n>0)b.textContent=`${label} (${n})`;else{clearInterval(CT);b.disabled=false;b.textContent=label;b.onclick=()=>{$("#m").innerHTML="";fn()}}},1000)}
 const cx=()=>{clearInterval(CT);$("#m").innerHTML=""};
-function del(kind,id){cfm("Delete this "+(kind==="apps"?"app":"tutorial")+"?","Delete",async()=>{await call("admin",{op:"del",kind,id});await load();tab="admin";draw()})}
-// maintenance form (5 fields)
-function mtOpen(){const m=S.maint||{},on=mOn(),v=m.end?new Date(m.end*1000-new Date(m.end*1000).getTimezoneOffset()*60000).toISOString().slice(0,16):"";
- modal(`${xb}<h2>Maintenance</h2><p>Visitors will only see this screen.</p><input id="mt_t" placeholder="Title (default: We’ll be right back)" value="${esc(m.title||"")}" style="margin-bottom:8px"><textarea id="mt_m" rows="3" placeholder="Message" style="margin-bottom:8px">${esc(m.msg||"")}</textarea>
- <small class="lab">Ends at, in your time zone (optional)</small><input id="mt_e" type="datetime-local" value="${v}" style="margin:6px 0 12px">
+function del(kind,id){cfm("Move this "+(kind==="apps"?"app":"tutorial")+" to the recycle bin?","Move",async()=>{await call("admin",{op:"del",kind,id});await load()})}
+// maintenance (can be scheduled ahead of time)
+const mtOpen=()=>{tab="admin";AP="maint";draw()};
+function pgMaint(){const m=S.maint||{},on=mOn(),sched=m.on&&m.start>Date.now()/1000,loc=t=>t?new Date(t*1000-new Date(t*1000).getTimezoneOffset()*60000).toISOString().slice(0,16):"";
+ $("#v").innerHTML=`${bk("site")}<h2>Maintenance</h2><div class="row"><small>Status</small><b>${on?"🔴 Active now":sched?"🟠 Scheduled for "+esc(dtstr(m.start)):"⚪ Off"}</b></div><p>Visitors will only see the maintenance screen. If you set a start time, visitors see an “Upcoming maintenance” notice on Home first.</p>
+ <input id="mt_t" placeholder="Title (default: We’ll be right back)" value="${esc(m.title||"")}" style="margin-bottom:8px"><textarea id="mt_m" rows="3" placeholder="Message" style="margin-bottom:8px">${esc(m.msg||"")}</textarea>
+ <small class="lab">Starts at, in your time zone (empty = right away)</small><input id="mt_s" type="datetime-local" value="${loc(m.start)}" style="margin:6px 0 10px">
+ <small class="lab">Ends at, in your time zone (optional)</small><input id="mt_e" type="datetime-local" value="${loc(m.end)}" style="margin:6px 0 12px">
  <label class="ck"><input type="checkbox" id="mt_c" ${m.cd!==false?"checked":""}> Show countdown</label><label class="ck"><input type="checkbox" id="mt_b" ${m.btn?"checked":""}> Show “Join our Telegram” button</label>
- ${on?`<button class="btn p" onclick="mtSave(true)">Save changes</button><button class="btn" onclick="mtOff()">Turn off</button>`:`<button class="btn dn" onclick="mtAsk()">Start maintenance</button>`}`)}
-function mtVals(){const v=$("#mt_e").value;return{title:$("#mt_t").value.trim(),msg:$("#mt_m").value.trim(),end:v?Math.floor(new Date(v).getTime()/1000):0,cd:$("#mt_c").checked,btn:$("#mt_b").checked}}
-function mtAsk(){const d=mtVals();if(d.end&&d.end<=Date.now()/1000)return alert("The end time must be in the future.");cfm("Start maintenance? Visitors will only see the maintenance screen.","Start",()=>mtSave(true,d))}
-async function mtSave(on,d){d=d||mtVals();if(on&&d.end&&d.end<=Date.now()/1000)return alert("The end time must be in the future.");await call("admin",{op:"maint",data:{...d,on}});$("#m").innerHTML="";await load();tab="admin";draw()}
-async function mtOff(){await call("admin",{op:"maint",data:{...(S.maint||{}),on:false}});$("#m").innerHTML="";await load();tab="admin";draw()}
+ ${m.on?`<button class="btn p" onclick="mtSave(true)">Save changes</button><button class="btn" onclick="mtOff()">Turn off</button>`:`<button class="btn dn" onclick="mtAsk()">Start or schedule maintenance</button>`}`}
+function mtVals(){const t=id=>{const v=$(id).value;return v?Math.floor(new Date(v).getTime()/1000):0};return{title:$("#mt_t").value.trim(),msg:$("#mt_m").value.trim(),start:t("#mt_s"),end:t("#mt_e"),cd:$("#mt_c").checked,btn:$("#mt_b").checked}}
+function mtBad(d){const n=Date.now()/1000;if(d.end&&d.end<=n)return"The end time must be in the future.";if(d.start&&d.end&&d.end<=d.start)return"The end must be after the start.";return""}
+function mtAsk(){const d=mtVals(),e=mtBad(d);if(e)return alert(e);cfm(d.start>Date.now()/1000?"Schedule maintenance? Visitors will see an upcoming notice until it starts.":"Start maintenance? Visitors will only see the maintenance screen.","Start",()=>mtSave(true,d))}
+async function mtSave(on,d){d=d||mtVals();const e=on&&mtBad(d);if(e)return alert(e);await call("admin",{op:"maint",data:{...d,on}});$("#m").innerHTML="";await load()}
+async function mtOff(){await call("admin",{op:"maint",data:{...(S.maint||{}),on:false}});$("#m").innerHTML="";await load()}
 
 // ---------- app and tutorial forms ----------
 const AF=[["name","App name"],["version","Version"],["log","What’s new (changelog)","t"],["publisher","Publisher"],["req","Requirements"],["cat","Category"],["size","Size"],["price","Price"],["safety","Safety label"],["desc","Description","t"],["url","Android link (MediaFire)"],["ios","iOS link (MediaFire)"],["res","Resources link (MediaFire, optional)"]],TF=[["title","Title"],["text","Text","t"],["video","Telegram video link"]];
@@ -327,7 +416,7 @@ async function save(){collect();if(F.kind==="apps"&&F.d.img&&!F.d.icon)F.d.icon=
   ["fl","fo","fb"].forEach(k=>{if(F.d[k]>0)data[k]=F.d[k]});if(F.d.old?.length)data.old=F.d.old;if(F.d.st)data.st=F.d.st;if(F.d.st==="sched")data.at=F.d.at;if(F.d.ft)data.ft=1}
  else if(!Object.keys(data).length)return alert("Fill in at least one field.");
  if(F.d.nb==="off")data.nb="off";if(F.d.nt)data.nt=F.d.nt;
- const r=await call("admin",{op:"save",kind:F.kind,id:F.id,data});if(r.ok){$("#m").innerHTML="";await load();tab="admin";draw()}else alert(r.error||"Could not save")}
+ const r=await call("admin",{op:"save",kind:F.kind,id:F.id,data});if(r.ok){$("#m").innerHTML="";await load()}else alert(r.error||"Could not save")}
 load();
 const ping=()=>{if(!document.hidden)call("ping")};setTimeout(ping,3000);setInterval(ping,15000);
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
