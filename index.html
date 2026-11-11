@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="lang.js"></script>
+<script src="lang.js?v=20261107a"></script>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#050b1c;--card:#0a1530;--line:#1b3a73;--blue:#3d8bff;--ice:#9ad7ff;--txt:#e8f1ff;--dim:#8ea6cc}
@@ -68,6 +68,7 @@ input,textarea{width:100%;background:#071230;border:1.5px solid var(--line);bord
 .pop button{display:flex;gap:10px;align-items:center;width:100%;background:none;border:0;color:var(--txt);padding:10px;border-radius:10px;font:500 15px system-ui;cursor:pointer;text-align:start}.pop button.on{background:#0b1e48;color:var(--ice)}.pop hr{border:0;border-top:1px solid var(--line);margin:6px 0}
 .tag.out{background:#3a0f14;border-color:#c0392b;color:#ff9a9a}.tag.upd{background:#0f3a1f;border-color:#2ecc71;color:#8dffb8}
 .chip.out{border-color:#c0392b;color:#ff9a9a}.chip.upd{border-color:#2ecc71;color:#8dffb8}.chip.on.out{background:#c0392b;color:#fff;border-color:#c0392b}.chip.on.upd{background:#2ecc71;color:#032a14;border-color:#2ecc71}
+.bc i.lv{background:var(--ice)}
 .stp{display:flex;gap:8px;align-items:center;margin-top:6px}.stp .btn{width:56px;flex:none}.stp input{text-align:center}
 .bars{display:flex;align-items:flex-end;gap:3px;height:110px;margin:8px 0 4px}.bc{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}.bc i{display:block;width:100%;background:var(--blue);border-radius:3px 3px 0 0;min-height:2px}.bc small{font-size:9px;color:var(--dim);height:12px}
 .pb{height:6px;background:#10265a;border-radius:3px;margin-top:6px}.pb i{display:block;height:100%;background:var(--blue);border-radius:3px}
@@ -113,7 +114,10 @@ const markSeen=k=>{const c=(S.tb||{})[k]||{};NS[k+"v"]=c.v||0;if(k==="apps"||k==
 
 async function load(){const m=location.hash.match(/^#c=([0-9a-f]+)$/);
  if(m){history.replaceState(null,"",location.pathname);const x=await call("redeem",{code:m[1]});if(x.session)localStorage.setItem("ss",x.session);else alert("This link expired. Open the site in Telegram and make a new one.")}
- const r=await call("init");if(r.error){$("#v").innerHTML=`<p class="empty">${tr("err_srv")}</p>`;return}
+ let r=await call("init");
+ if(r.error){let c=null;try{c=JSON.parse(localStorage.getItem("lastInit")||"null")}catch{}
+  if(c&&Date.now()-c.t<3600e3)r={...c.r,stale:true};else{$("#v").innerHTML=`<p class="empty">${tr("err_srv")}</p>`;return}}
+ else{try{if(!r.maint)localStorage.setItem("lastInit",JSON.stringify({t:Date.now(),r}))}catch{}r.stale=false}
  S={...S,...r};localStorage.setItem("seen","1");clearTimeout(UT);if(S.up&&S.up.start)UT=setTimeout(load,Math.min(3e8,Math.max(1000,S.up.start*1000-Date.now()+1500)));
  if(!S.ident&&localStorage.getItem("ss"))localStorage.removeItem("ss");
  if(tg?.initDataUnsafe?.start_param==="reg"&&!sessionStorage.getItem("reg")){sessionStorage.setItem("reg","1");autoReg()}
@@ -127,7 +131,7 @@ function draw(np){clearInterval(MT);clearInterval(AT);
  if(tab!=="admin")markSeen(tab);
  const tabs=[["home","nav_home"],["apps","nav_apps"],["tuts","nav_tuts"],["social","nav_social"],["more","nav_more"]];
  $("#nav").innerHTML=tabs.map(([k,n])=>`<button class="${tab===k?"on":""}" onclick="tab='${k}';${k==="more"?"MP='';":""}draw()">${tr(n)}${isNew(k)?`<i class="nw">${tr("b_new")}!</i>`:""}</button>`).join("")+(S.admin&&as==="owner"?`<button class="${tab==="admin"?"on":""}" onclick="AP='';tab='admin';draw()">Admin</button>`:"");
- $("#bar").innerHTML=S.admin&&as!=="owner"?`<div class="bar">Previewing as ${as==="member"?"Member":"Visitor"} · <u onclick="as='owner';draw()">Exit</u></div>`:S.admin&&mOn()?`<div class="bar red">Maintenance is ON · <u onclick="mtOpen()">Edit</u> · <u onclick="mtOff()">Turn off</u></div>`:"";
+ $("#bar").innerHTML=(S.stale?`<div class="bar red">${tr("stale")}</div>`:"")+(S.admin&&as!=="owner"?`<div class="bar">Previewing as ${as==="member"?"Member":"Visitor"} · <u onclick="as='owner';draw()">Exit</u></div>`:S.admin&&mOn()?`<div class="bar red">Maintenance is ON · <u onclick="mtOpen()">Edit</u> · <u onclick="mtOff()">Turn off</u></div>`:"");
  ({home,apps,tuts,social,more,admin})[tab]();window.scrollTo(0,0);if(!np&&needReg())regPop()}
 
 // ---------- maintenance screen ----------
@@ -151,7 +155,7 @@ async function pollVote(o){if(needReg())return regPop();const r=await call("poll
 const trendHtml=()=>{const m=Object.fromEntries(S.apps.filter(x=>!x.cs).map(x=>[x.id,x])),a=(S.trend||[]).filter(r=>m[r.app]).slice(0,5);
  return a.length?`<h3>🔥 ${tr("trending")}</h3>`+a.map((r,i)=>{const x=m[r.app];return `<div class="card" onclick="show(${x.id})"><div style="font:700 20px 'Chakra Petch',sans-serif;color:var(--ice);width:26px">${i+1}</div>${ico(x)}<div><b>${esc(x.name)}${bdx(x)}</b><small>${esc([x.version,x.size].filter(Boolean).join(" · "))}</small></div></div>`}).join(""):""};
 const rec=()=>{const vis=S.apps.filter(x=>!x.cs).sort((a,b)=>(b.t||0)-(a.t||0)||b.id-a.id),ft=vis.find(x=>x.ft),rest=vis.filter(x=>!x.ft).slice(0,5),cs=S.apps.filter(x=>x.cs);
- return upHtml()+(ft?`<h3>${tr("featured")}</h3>${rcard(ft)}`:"")+pollHtml()+trendHtml()+(cs.length?`<h3>${tr("soon")}</h3>`+cs.map(x=>`<div class="card" onclick="show(${x.id})">${ico(x)}<div><b>${esc(x.name)}${bdx(x)}</b><small>${esc(dtstr(x.at))}</small></div></div>`).join(""):"")+(rest.length?`<h3>${tr("recent")}</h3>`+rest.map(rcard).join(""):"")};
+ return upHtml()+(ft?`<h3>${tr("featured")}</h3>${rcard(ft)}`:"")+pollHtml()+(cs.length?`<h3>${tr("soon")}</h3>`+cs.map(x=>`<div class="card" onclick="show(${x.id})">${ico(x)}<div><b>${esc(x.name)}${bdx(x)}</b><small>${esc(dtstr(x.at))}</small></div></div>`).join(""):"")+trendHtml()+(rest.length?`<h3>${tr("recent")}</h3>`+rest.map(rcard).join(""):"")};
 function home(){$("#v").innerHTML=`<button class="lgbox" onclick="lgOpen()" aria-label="${tr("language")}">${(LANGS.find(l=>l[0]===LG)||LANGS[0])[1]}<small>▾</small></button><div class="hero"><img class="logo" src="logo.png" alt=""><h1>Sito eFootball</h1><p>${tr("welcome")}</p><button class="btn p" onclick="go(CH)">${tr("join_tg")}</button><br><input placeholder="${tr("search_all")}" aria-label="${tr("search_all")}" oninput="gs(this.value)" style="margin-top:14px"></div><div id="sug" style="margin-top:14px"></div><div id="rec">${rec()}</div>`;fh();fi()}
 function gs(v){v=v.trim().toLowerCase();const el=$("#sug"),rc=$("#rec");rc.style.display=v?"none":"";if(!v){el.innerHTML="";return}
  const a=S.apps.filter(x=>hay(x,["name","version","cat","publisher","desc","log","tags"]).includes(v)).slice(0,6),t=S.tuts.filter(x=>hay(x,["title","text"]).includes(v)).slice(0,6);
@@ -174,14 +178,14 @@ function show(id){const x=S.apps.find(a=>a.id===id);if(!x)return;const soon=x.cs
  ${x.safety?`<p style="text-align:center">${esc(x.safety)}</p>`:""}${x.desc?`<p>${esc(x.desc)}</p>`:""}${x.log?`<div class="row"><small>${tr("whats_new")}</small><b style="white-space:pre-wrap">${esc(x.log)}</b></div>`:""}
  ${Object.keys(L).filter(k=>x[k]).map(k=>`<div class="row"><small>${tr(L[k])}</small><b>${esc(x[k])}</b></div>`).join("")}
  ${soon?"":`${x.old?.length?`<h3>${tr("older")}</h3>${x.old.map((e,i)=>`<div class="row"><b>${esc(e.v||"—")}</b> <small style="display:inline">${esc(dstr(e.d))}</small>${e.log?`<small style="white-space:pre-wrap;margin-top:4px">${esc(e.log)}</small>`:""}<div class="seg" style="margin:8px 0 0">${e.pa?`<button class="btn" onclick="dl(${x.id},'a',${i})">Android</button>`:""}${e.pi?`<button class="btn" onclick="dl(${x.id},'i',${i})">iOS</button>`:""}${e.pr?`<button class="btn" onclick="dl(${x.id},'r',${i})">📦</button>`:""}</div></div>`).join("")}`:""}
- ${x.pa?`<button class="btn p" style="margin-top:12px" onclick="dl(${x.id},'a')">${tr("dl_android")}</button>`:""}${x.pi?`<button class="btn${x.pa?"":" p"}" style="margin-top:10px" onclick="dl(${x.id},'i')">${tr("dl_ios")}</button>`:""}${x.pr?`<button class="btn" style="margin-top:10px" onclick="dl(${x.id},'r')">📦 ${tr("dl_res")}</button>`:""}${tg?.initData||localStorage.getItem("ss")?`<button class="btn" style="margin-top:10px" onclick="rpOpen(${x.id})">${tr("report")}</button>`:""}`}`);
+ ${!x.pa&&!x.pi&&!x.pr?`<p style="text-align:center;margin-top:12px">⏳ ${tr("nolink")}</p>`:""}${x.pa?`<button class="btn p" style="margin-top:12px" onclick="dl(${x.id},'a')">${tr("dl_android")}</button>`:""}${x.pi?`<button class="btn${x.pa?"":" p"}" style="margin-top:10px" onclick="dl(${x.id},'i')">${tr("dl_ios")}</button>`:""}${x.pr?`<button class="btn" style="margin-top:10px" onclick="dl(${x.id},'r')">📦 ${tr("dl_res")}</button>`:""}${tg?.initData||localStorage.getItem("ss")?`<button class="btn" style="margin-top:10px" onclick="rpOpen(${x.id})">${tr("report")}</button>`:""}`}`);
  loadHero(x.id);if(soon){clearInterval(CS);const t=()=>{const e=$("#cs_cd");if(!e){clearInterval(CS);return}const s=Math.max(0,x.at-Math.floor(Date.now()/1000));e.innerHTML=cdHtml(s);if(s<=0){clearInterval(CS);$("#m").innerHTML="";load()}};t();CS=setInterval(t,1000)}else call("view",{id:x.id})}
 async function likeIt(id){if(needReg())return regPop();const r=await call("like",{id});
  if(r.ok){const x=S.apps.find(a=>a.id===id);x.lk=r.lk;x.me=true;const b=$("#lkb");if(b){b.classList.add("on");b.disabled=true;$("#lc").textContent=r.lk}}else alert(r.error||"")}
 async function voteIt(id,v){if(needReg())return regPop();const r=await call("vote",{id,v});
  if(r.ok){const x=S.apps.find(a=>a.id===id);x.ok=r.w;x.bad=r.n;x.mv=r.mv;["1","0"].forEach(k=>{const b=$("#v"+k);if(b){b.disabled=true;b.classList.toggle("on",String(r.mv)===k)}});$("#vc1").textContent=r.w;$("#vc0").textContent=r.n}else alert(r.error||"")}
 async function dl(id,p,o){LD=[id,p,o];if(S.admin&&as==="visitor"&&S.lock)return lockSheet();
- const r=await call("dl",{id,p,o});if(r.url)go(r.url);else if(r.error==="not_member")(needReg()?regPop:lockSheet)();else if(r.error==="limit")alert(tr("dl_limit"));else alert(r.error||tr("err_srv"))}
+ const r=await call("dl",{id,p,o});if(r.url)go(r.url);else if(r.error==="not_member")(needReg()?regPop:lockSheet)();else if(r.error==="limit")alert(tr("dl_limit"));else if(r.error==="retry"||r.error==="busy")alert(tr("err_srv"));else alert(r.error||tr("err_srv"))}
 const needReg=()=>!tg?.initData&&!S.ident&&!S.admin&&!S.preview&&!mOn();
 function regPop(){modal(`${xb}<h2>${tr("reg_t")}</h2><p>${tr("reg_p")}</p><button class="btn p" onclick="regGo()">${tr("reg_b")}</button>`)}
 const regGo=()=>{location.href=MINI+"?startapp=reg"};
@@ -273,29 +277,30 @@ function admin(){clearInterval(AT);
  const P={traffic:pgTraffic,aud:pgAud,apps:pgApps,tuts:pgTuts,trash:pgTrash,reqs:pgReqs,poll:pgPoll,bans:pgBans,badges:pgBadges,maint:pgMaint,tools:pgTools,view:pgView}[AP];if(P)return P();
  $("#v").innerHTML=(AP?bk(UPP[AP]):"")+`<h2>${AP?TTL[AP]:"Admin"}</h2>`+(MENUS[AP]||MENUS[""]).map(([k,l])=>`<button class="btn" onclick="go2('${k}')">${l}${bdg(k)}</button>`).join("")}
 const sum=v=>v.reduce((a,b)=>a+b,0);
-const bars=(vals,labs)=>{const mx=Math.max(1,...vals);return `<div class="bars">${vals.map((v,i)=>`<div class="bc"><i style="height:${Math.round(v/mx*100)}%"></i><small>${labs[i]??""}</small></div>`).join("")}</div>`};
+const bars=(vals,labs,lv)=>{const mx=Math.max(1,...vals);return `<div class="bars">${vals.map((v,i)=>`<div class="bc"><i class="${i===lv?"lv":""}" style="height:${Math.round(v/mx*100)}%"></i><small>${labs[i]??""}</small></div>`).join("")}</div>`};
 const flag=c=>/^[A-Z]{2}$/.test(c)?String.fromCodePoint(...[...c].map(ch=>127397+ch.charCodeAt(0))):"🌐";
 const cname=c=>{try{return new Intl.DisplayNames(["en"],{type:"region"}).of(c)||c}catch{return c}};
 const prow=(rows,name)=>{const t=sum(rows.map(r=>r.c))||1;return rows.sort((x,y)=>y.c-x.c).map(r=>{const p=Math.round(r.c/t*100);return `<div class="row"><b>${name(r.v)}</b> <small style="display:inline">${r.c} · ${p}%</small><div class="pb"><i style="width:${p}%"></i></div></div>`}).join("")||'<p class="empty">No data yet.</p>'};
+const mergeH=(hist,T,key)=>{const m={};[...hist,T].forEach(x=>Object.entries(x[key]||{}).forEach(([k,c])=>m[k]=(m[k]||0)+c));return Object.entries(m).map(([v,c])=>({v,c}))};
+const dayList=()=>[...Array(13)].map((_,i)=>new Date(Date.now()-(13-i)*864e5).toISOString().slice(0,10));
 async function pgTraffic(){$("#v").innerHTML=`${bk("stats")}<h2>Traffic</h2><p class="empty">Loading…</p>`;
  const [s,a]=await Promise.all([call("admin",{op:"stats"}),call("admin",{op:"analytics"})]);if(AP!=="traffic")return;if(s.error||a.error){$("#v").innerHTML=`${bk("stats")}<p class="empty">${esc(s.error||a.error)}</p>`;return}
- const days=[...Array(14)].map((_,i)=>new Date(Date.now()-(13-i)*864e5).toISOString().slice(0,10)),map=(arr,k)=>Object.fromEntries((arr||[]).map(r=>[r[k],r.c]));
- const vm=map(a.visits,"day"),dm=map(a.downloads,"day"),vv=days.map(d=>vm[d]||0),dd=days.map(d=>dm[d]||0),lab=days.map(d=>d.slice(8));
- const off=Math.round(new Date().getTimezoneOffset()/60),hm=map(a.hours,"h"),hh=[...Array(24)].map((_,i)=>hm[(i+off+24)%24]||0),hl=hh.map((_,i)=>i%3?"":i);
- $("#v").innerHTML=`${bk("stats")}<h2>Traffic</h2><div class="row"><small>Visitors (live)</small><b id="sv">${s.visits} total · ${s.today} today · 🟢 ${s.online} online</b></div><div class="row"><small>Downloads</small><b id="sdl">${s.downloads}</b></div>
- <h3>Visits, last 14 days</h3><small class="lab">Total ${sum(vv)} · best day ${Math.max(...vv)}</small>${bars(vv,lab)}
- <h3>Downloads, last 14 days</h3><small class="lab">Total ${sum(dd)} · best day ${Math.max(...dd)}</small>${bars(dd,lab)}
+ const hist=a.hist||[],T=a.today,by=Object.fromEntries(hist.map(x=>[x.day,x])),days=dayList(),vv=[...days.map(d=>by[d]?.v||0),T.v],dd=[...days.map(d=>by[d]?.d||0),T.d],lab=[...days.map(d=>d.slice(8)),T.day.slice(8)];
+ const off=Math.round(new Date().getTimezoneOffset()/60),hs=[...Array(24)].map((_,h)=>sum(hist.map(x=>x.h?.[h]||0))+(T.h[h]||0)),hh=[...Array(24)].map((_,i)=>hs[(i+off+24)%24]),hl=hh.map((_,i)=>i%3?"":i);
+ $("#v").innerHTML=`${bk("stats")}<h2>Traffic</h2><div class="row"><small>Live now</small><b id="sv">${s.visits} total · ${s.today} today · 🟢 ${s.online} active in the last 30 min</b></div><div class="row"><small>Downloads</small><b id="sdl">${s.downloads}</b></div><p>Finished days are saved once and never recounted. The light bar is today, which is still live.</p>
+ <h3>Visits, last 14 days</h3><small class="lab">Total ${sum(vv)} · best day ${Math.max(...vv)}</small>${bars(vv,lab,13)}
+ <h3>Downloads, last 14 days</h3><small class="lab">Total ${sum(dd)} · best day ${Math.max(...dd)}</small>${bars(dd,lab,13)}
  <h3>Busiest hours (your time)</h3><small class="lab">Visits by hour of day</small>${bars(hh,hl)}
- <h3>Visitor languages</h3>${prow((a.langs||[]).map(l=>({v:l.l,c:l.c})),v=>{const g=LANGS.find(x=>x[0]===v)||[v,"🌐",v];return `${g[1]} ${g[2]}`})}`;live()}
+ <h3>Visitor languages</h3>${prow(mergeH(hist,T,"l"),v=>{const g=LANGS.find(x=>x[0]===v)||[v,"🌐",v];return `${g[1]} ${g[2]}`})}`;live()}
 async function pgAud(){$("#v").innerHTML=`${bk("stats")}<h2>Audience</h2><p class="empty">Loading…</p>`;const a=await call("admin",{op:"analytics"});if(AP!=="aud")return;if(a.error){$("#v").innerHTML=`${bk("stats")}<p class="empty">${esc(a.error)}</p>`;return}
- const g=k=>(a.aud||[]).filter(r=>r.k===k).map(r=>({v:r.v,c:r.c}));
- $("#v").innerHTML=`${bk("stats")}<h2>Audience</h2><small class="lab">Last 14 days. Counted since this update.</small>
- <h3>Countries</h3>${prow(g("ctry").sort((x,y)=>y.c-x.c).slice(0,10),v=>v==="??"?"🌐 Unknown":`${flag(v)} ${esc(cname(v))}`)}
- <h3>Devices</h3>${prow(g("dev"),v=>({a:"🤖 Android",i:"🍎 iPhone / iPad",d:"💻 Desktop / other"})[v]||v)}
- <h3>New and returning</h3>${prow(g("ret"),v=>v==="r"?"🔁 Returning visitors":"✨ New visitors")}
- <h3>Downloads by type</h3>${prow(g("dlp"),v=>({a:"Android",i:"iOS",r:"📦 Resources"})[v]||v)}`}
+ const hist=a.hist||[],T=a.today,g=k=>mergeH(hist,T,k);
+ $("#v").innerHTML=`${bk("stats")}<h2>Audience</h2><small class="lab">Last 14 days. Counted since the update that added it.</small>
+ <h3>Countries</h3>${prow(g("c").sort((x,y)=>y.c-x.c).slice(0,10),v=>v==="??"?"🌐 Unknown":`${flag(v)} ${esc(cname(v))}`)}
+ <h3>Devices</h3>${prow(g("dv"),v=>({a:"🤖 Android",i:"🍎 iPhone / iPad",d:"💻 Desktop / other"})[v]||v)}
+ <h3>New and returning</h3>${prow(g("r"),v=>v==="r"?"🔁 Returning visitors":"✨ New visitors")}
+ <h3>Downloads by type</h3>${prow(g("p"),v=>({a:"Android",i:"iOS",r:"📦 Resources"})[v]||v)}`}
 async function pgApps(c){if(!(c&&LST)){$("#v").innerHTML=`${bk("content")}<h2>Apps</h2><p class="empty">Loading…</p>`;LST=await call("admin",{op:"stats"});if(AP!=="apps")return}const s=LST;
- $("#v").innerHTML=`${bk("content")}<h2>Apps</h2><div class="seg"><button class="btn p" onclick="openForm('apps')">＋ Add app</button><button class="btn" onclick="selMode()">${SEL?"✔ Done selecting":"☑ Select several"}</button></div>${SEL&&SEL.size?`<div class="row"><b>${SEL.size} selected</b><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="bulkSt()">Status</button><button class="btn" onclick="bulkTags()">Tags</button><button class="btn" onclick="bulkDel()">To bin</button></div></div>`:""}${S.apps.map(x=>`<div class="row">${SEL?`<label class="ck" style="margin:0"><input type="checkbox" ${SEL.has(x.id)?"checked":""} onchange="selT(${x.id},this.checked)"> <b>${esc(x.name)}</b></label>`:`<b>${esc(x.name)}</b>`}${x.st==="draft"?' <span class="bd">Draft</span>':x.cs?' <span class="bd gold">Scheduled</span>':""}${x.ft?' <span class="bd gold">Featured</span>':""} <small id="pa${x.id}">${ptxt(s,x)}</small>${SEL?"":`<div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('apps',${x.id})">Edit</button><button class="btn" onclick="dupIt('apps',${x.id})">Duplicate</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div>`}</div>`).join("")}`;live()}
+ $("#v").innerHTML=`${bk("content")}<h2>Apps</h2><div class="seg"><button class="btn p" onclick="openForm('apps')">＋ Add app</button><button class="btn" onclick="selMode()">${SEL?"✔ Done selecting":"☑ Select several"}</button></div>${SEL&&SEL.size?`<div class="row"><b>${SEL.size} selected</b><div class="seg" style="margin:8px 0 0"><button class="btn" onclick="bulkSt()">Status</button><button class="btn" onclick="bulkTags()">Tags</button><button class="btn" onclick="bulkDel()">To bin</button></div></div>`:""}${S.apps.map(x=>`<div class="row">${SEL?`<label class="ck" style="margin:0"><input type="checkbox" ${SEL.has(x.id)?"checked":""} onchange="selT(${x.id},this.checked)"> <b>${esc(x.name)}</b></label>`:`<b>${esc(x.name)}</b>`}${x.st==="draft"?' <span class="bd">Draft</span>':x.cs?' <span class="bd gold">Scheduled</span>':""}${x.ft?' <span class="bd gold">Featured</span>':""}${!x.pa&&!x.pi?' <span class="bd" style="background:#ff9f43">No link yet</span>':""} <small id="pa${x.id}">${ptxt(s,x)}</small>${SEL?"":`<div class="seg" style="margin:8px 0 0"><button class="btn" onclick="openForm('apps',${x.id})">Edit</button><button class="btn" onclick="dupIt('apps',${x.id})">Duplicate</button><button class="btn" onclick="del('apps',${x.id})">Delete</button></div>`}</div>`).join("")}`;live()}
 const selMode=()=>{SEL=SEL?null:new Set();pgApps(1)},selT=(id,on)=>{on?SEL.add(id):SEL.delete(id);pgApps(1)};
 function bulkSt(){modal(`${xb}<h2>Status for ${SEL.size} apps</h2><button class="btn p" onclick="bulkDo({st:'pub'})">Published</button><button class="btn" onclick="bulkDo({st:'draft'})">Draft (hidden)</button>`)}
 function bulkTags(){BT={add:[],rem:[]};modal(`${xb}<h2>Tags for ${SEL.size} apps</h2><small class="lab">Add these tags</small><div class="chips">${TAGS.map(t=>`<span class="chip ${tcl(t)}" onclick="btT('add','${t}',this)">${t}</span>`).join("")}</div><small class="lab">Remove these tags</small><div class="chips">${TAGS.map(t=>`<span class="chip ${tcl(t)}" onclick="btT('rem','${t}',this)">${t}</span>`).join("")}</div><button class="btn p" onclick="bulkDo({add:BT.add,rem:BT.rem})">Apply</button>`)}
@@ -346,8 +351,8 @@ async function bkNow(){const r=await call("admin",{op:"backup"});alert(r.ok?`Bac
 async function rsPick(e){const f=e.files[0];if(!f)return;let d;try{d=JSON.parse(await f.text())}catch{return alert("That is not a valid backup file.")}RS=d;
  cfm("Restore this backup? Items with the same ID are overwritten. Nothing is deleted.","Restore",async()=>{const r=await call("admin",{op:"restore",data:RS});alert(r.ok?`Restored ${r.items} items.`:r.error||"Failed");await load()})}
 async function chkNow(){await call("admin",{op:"check"});admin()}
-function live(){clearInterval(AT);AT=setInterval(async()=>{if(tab!=="admin"||(!$("#sv")&&!document.querySelector("[id^=pa]"))){clearInterval(AT);return}const s=await call("admin",{op:"stats"});if(s.error)return;
- const sv=$("#sv");if(sv){sv.textContent=`${s.visits} total · ${s.today} today · 🟢 ${s.online} online`;$("#sdl").textContent=s.downloads}LST=s;S.apps.forEach(x=>{const e=$("#pa"+x.id);if(e)e.textContent=ptxt(s,x)})},8000)}
+function live(){clearInterval(AT);AT=setInterval(async()=>{if(document.hidden)return;if(tab!=="admin"||(!$("#sv")&&!document.querySelector("[id^=pa]"))){clearInterval(AT);return}const s=await call("admin",{op:"stats"});if(s.error)return;
+ const sv=$("#sv");if(sv){sv.textContent=`${s.visits} total · ${s.today} today · 🟢 ${s.online} active in the last 30 min`;$("#sdl").textContent=s.downloads}LST=s;S.apps.forEach(x=>{const e=$("#pa"+x.id);if(e)e.textContent=ptxt(s,x)})},15000)}
 async function lk(){await call("admin",{op:"lock",v:!S.lock});S.lock=!S.lock;admin()}
 // confirmation with a 5-second lock (Cancel is instant)
 function cfm(msg,label,fn){let n=5;modal(`<h2>${esc(msg)}</h2><button class="btn" onclick="cx()">Cancel</button><button class="btn dn" id="cb" disabled>${esc(label)} (5)</button>`);
@@ -373,7 +378,7 @@ async function mtOff(){await call("admin",{op:"maint",data:{...(S.maint||{}),on:
 const AF=[["name","App name"],["version","Version"],["log","What’s new (changelog)","t"],["publisher","Publisher"],["req","Requirements"],["cat","Category"],["size","Size"],["price","Price"],["safety","Safety label"],["desc","Description","t"],["url","Android link (MediaFire)"],["ios","iOS link (MediaFire)"],["res","Resources link (MediaFire, optional)"]],TF=[["title","Title"],["text","Text","t"],["video","Telegram video link"]];
 const PRE={name:["eFootxi 27","Kipas FOOTBALL","eFootball73"],publisher:["Sito (Owner)"],price:["Free"],safety:["100% Safe and Tested"]},MAND=["name"];
 const mand=k=>F.kind==="apps"&&MAND.includes(k);
-function shrink(f,max,q,sq,mime){return new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement("canvas"),x=c.getContext("2d");if(sq){c.width=c.height=sq;const m=Math.min(i.width,i.height);x.drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,sq,sq)}else{const k=Math.min(1,max/Math.max(i.width,i.height));c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);x.drawImage(i,0,0,c.width,c.height)}r(c.toDataURL(mime||"image/webp",q))};i.src=URL.createObjectURL(f)})}
+function shrink(f,max,q,sq,mime){return new Promise(r=>{const u=URL.createObjectURL(f),i=new Image();i.onload=()=>{try{const c=document.createElement("canvas"),x=c.getContext("2d");if(sq){c.width=c.height=sq;const m=Math.min(i.width,i.height);x.drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,sq,sq)}else{const k=Math.min(1,max/Math.max(i.width,i.height));c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);x.drawImage(i,0,0,c.width,c.height)}r(c.toDataURL(mime||"image/webp",q))}catch{r(null)}URL.revokeObjectURL(u)};i.onerror=()=>{URL.revokeObjectURL(u);r(null)};i.src=u})}
 const thumb=u=>new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement("canvas");c.width=c.height=192;const m=Math.min(i.width,i.height);c.getContext("2d").drawImage(i,(i.width-m)/2,(i.height-m)/2,m,m,0,0,192,192);r(c.toDataURL("image/webp",.8))};i.onerror=()=>r("");i.src=u});
 async function openForm(kind,id){let d={};
  if(id){d={...S[kind].find(x=>x.id===id)};if(kind==="apps"){const r=await call("app",{id});if(r.error)return alert("Couldn’t load the images. Try again.");d.img=r.img||"";d.shots=r.shots||[]}}
@@ -401,16 +406,19 @@ function delOld(i){collect();F.d.old.splice(i,1);rf()}
 function rf(){const fs=F.kind==="apps"?AF:TF,sh=$(".sheet"),st=sh?sh.scrollTop:0,d=F.d;
  const row=([k,l,t])=>F.hide[k]?"":`<div class="fr">${t?`<textarea id="f_${k}" rows="3" placeholder="${l}">${esc(d[k])}</textarea>`:`<input id="f_${k}" placeholder="${l}" value="${esc(d[k])}">`}${mand(k)?"":`<b role="button" aria-label="Remove ${l}" onclick="rm('${k}')">✕</b>`}</div>${F.kind==="apps"&&PRE[k]?`<div class="chips">${PRE[k].map(v=>`<span class="chip" onclick="fill('${k}',this.textContent)">${esc(v)}</span>`).join("")}</div>`:""}`;
  const gone=fs.filter(([k])=>F.hide[k]);
- modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${F.id?"Edit":"Add"}</h2><p>Tap ✕ to remove a field. Removed fields don’t show on the site.</p>${F.kind==="apps"?imgs()+tagsUi():""}${fs.map(row).join("")}${gone.length?`<small style="color:var(--dim)">Removed fields, tap to add back</small><div class="chips">${gone.map(([k,l])=>`<span class="chip" onclick="ad('${k}')">+ ${l}</span>`).join("")}</div>`:""}${F.kind==="apps"?statUi()+featUi()+newUi()+histUi()+likesUi():newUi()}<button class="btn p" style="margin-top:12px" onclick="save()">Save</button>`);
+ modal(`<button class="x" onclick="$('#m').innerHTML=''">✕</button><h2>${F.id?"Edit":"Add"}</h2><p>Tap ✕ to remove a field. Removed fields don’t show on the site.</p>${F.kind==="apps"?imgs()+tagsUi():""}${fs.map(row).join("")}${gone.length?`<small style="color:var(--dim)">Removed fields, tap to add back</small><div class="chips">${gone.map(([k,l])=>`<span class="chip" onclick="ad('${k}')">+ ${l}</span>`).join("")}</div>`:""}${F.kind==="apps"?statUi()+featUi()+newUi()+histUi()+likesUi():newUi()}${UPL?`<p class="empty" style="padding:8px 0">${esc(UPM)}</p>`:""}<button class="btn p" style="margin-top:12px" ${UPL?"disabled":""} onclick="save()">${UPL?"Please wait…":"Save"}</button>`);
  const n=$(".sheet");if(n)n.scrollTop=st}
 const fill=(k,v)=>{$("#f_"+k).value=v};
 function tgl(t){collect();const a=(F.d.tags||[]).filter(x=>!(t==="Outdated"&&x==="Updated")&&!(t==="Updated"&&x==="Outdated"));F.d.tags=a.includes(t)?a.filter(x=>x!==t):[...a,t];rf()}
 function rm(k){collect();F.hide[k]=1;rf()}
 function ad(k){collect();delete F.hide[k];rf()}
-async function pm(e){const f=e.files[0];if(!f)return;collect();F.d.img=await shrink(f,800,.72);F.d.icon=await shrink(f,0,.8,192);rf()}
-async function ps(e){collect();F.d.shots=F.d.shots||[];for(const f of [...e.files]){if(F.d.shots.length>=6)break;F.d.shots.push(await shrink(f,800,.72))}rf()}
-async function save(){collect();if(F.kind==="apps"&&F.d.img&&!F.d.icon)F.d.icon=await thumb(F.d.img);const fs=F.kind==="apps"?AF:TF,data={};fs.forEach(([k])=>{const v=F.hide[k]?"":String(F.d[k]||"").trim();if(v)data[k]=v});
- if(F.kind==="apps"){if(!data.name||(!data.url&&!data.ios))return alert("App name and at least one download link are required.");
+let UPL=0,UPM="";
+async function pm(e){const f=e.files[0];if(!f)return;collect();UPL++;UPM="Processing the main image…";rf();const a=await shrink(f,800,.72),b=await shrink(f,0,.8,192);UPL--;UPM="";if(a){F.d.img=a;F.d.icon=b||""}else alert("Couldn’t read that image: "+f.name);rf()}
+async function ps(e){collect();F.d.shots=F.d.shots||[];const fs=[...e.files],bad=[];let n=0;UPL++;
+ for(const f of fs){if(F.d.shots.length>=6){bad.push(f.name+" (limit of 6)");continue}collect();UPM=`Processing image ${++n} of ${fs.length}…`;rf();const s=await shrink(f,800,.72);if(s)F.d.shots.push(s);else bad.push(f.name)}
+ UPL--;UPM="";collect();rf();if(bad.length)alert("Couldn’t use: "+bad.join(", "))}
+async function save(){if(UPL)return alert("Images are still processing. Wait a moment.");collect();if(F.kind==="apps"&&F.d.img&&!F.d.icon)F.d.icon=await thumb(F.d.img);const fs=F.kind==="apps"?AF:TF,data={};fs.forEach(([k])=>{const v=F.hide[k]?"":String(F.d[k]||"").trim();if(v)data[k]=v});
+ if(F.kind==="apps"){if(!data.name)return alert("The app needs a name.");if(!F.d.st&&!data.url&&!data.ios)return alert("A published app needs at least one download link. Drafts and scheduled apps can be saved without one.");
   if(F.d.st==="sched"&&(!F.d.at||F.d.at<=Date.now()/1000))return alert("Pick a release date and time in the future, or choose Published.");
   if(F.d.img)data.img=F.d.img;if(F.d.icon)data.icon=F.d.icon;if(F.d.shots?.length)data.shots=F.d.shots;if(F.d.tags?.length)data.tags=F.d.tags;
   ["fl","fo","fb"].forEach(k=>{if(F.d[k]>0)data[k]=F.d[k]});if(F.d.old?.length)data.old=F.d.old;if(F.d.st)data.st=F.d.st;if(F.d.st==="sched")data.at=F.d.at;if(F.d.ft)data.ft=1}
@@ -418,6 +426,6 @@ async function save(){collect();if(F.kind==="apps"&&F.d.img&&!F.d.icon)F.d.icon=
  if(F.d.nb==="off")data.nb="off";if(F.d.nt)data.nt=F.d.nt;
  const r=await call("admin",{op:"save",kind:F.kind,id:F.id,data});if(r.ok){$("#m").innerHTML="";await load()}else alert(r.error||"Could not save")}
 load();
-const ping=()=>{if(!document.hidden)call("ping")};setTimeout(ping,3000);setInterval(ping,15000);
+let LASTP=Date.now();const ping=()=>{if(!document.hidden){LASTP=Date.now();call("ping")}};setInterval(ping,1800000);document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-LASTP>1800000)ping()});
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script></body></html>
